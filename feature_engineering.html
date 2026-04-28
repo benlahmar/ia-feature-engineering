@@ -1,0 +1,3004 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Feature Engineering Avancé · Master IA</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Outfit:wght@300;400;500;600&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-chtml.js"></script>
+<style>
+:root {
+  --bg: #08101f;
+  --surface: #0e1a2e;
+  --surface2: #162033;
+  --border: rgba(255,255,255,0.07);
+  --border2: rgba(255,255,255,0.12);
+  --gold: #c9a84c;
+  --gold-light: #e8c87a;
+  --gold-dim: rgba(201,168,76,0.15);
+  --text: #dde4ef;
+  --text-dim: #7a90ae;
+  --text-muted: #4a5f7a;
+  --code-bg: #050d1a;
+  --c-encoding: #4f9cf9;
+  --c-transform: #a78bfa;
+  --c-crossing: #fb923c;
+  --c-binning: #34d399;
+  --c-selection: #f87171;
+  --c-reduction: #818cf8;
+  --c-temporal: #38bdf8;
+  --c-text: #f59e0b;
+  --c-cluster: #e879f9;
+  --c-geo: #4ade80;
+  --c-missing: #94a3b8;
+  --c-graph: #60a5fa;
+  --c-packaging: #fb7185;
+
+   /* ➕ Ajouter ces nouvelles */
+  --heading: var(--heading);        /* titres principaux */
+  --heading-card: var(--heading-card);   /* titres dans les cartes */
+  --white-surface: #ffffff;  /* fonds blancs */
+  --thumb-bg: #ffffff;       /* thumb du toggle */
+}
+
+[data-theme="light"] {
+  --heading: #1a1a2e;
+  --heading-card: #2a2a4e;
+  --white-surface: #1a1a2e;
+  --thumb-bg: #1a1a2e;
+
+}
+
+* { margin: 0; padding: 0; box-sizing: border-box; }
+
+html { scroll-behavior: smooth; }
+
+body {
+  font-family: 'Outfit', sans-serif;
+  background: var(--bg);
+  color: var(--text);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* ═══ LAYOUT ═══ */
+.layout { display: flex; min-height: 100vh; }
+
+/* ═══ SIDEBAR ═══ */
+.sidebar {
+  width: 280px;
+  flex-shrink: 0;
+  position: fixed;
+  top: 0; left: 0; bottom: 0;
+  background: var(--surface);
+  border-right: 1px solid var(--border);
+  overflow-y: auto;
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+}
+
+.sidebar::-webkit-scrollbar { width: 4px; }
+.sidebar::-webkit-scrollbar-track { background: transparent; }
+.sidebar::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
+
+.sidebar-logo {
+  padding: 2rem 1.5rem 1.5rem;
+  border-bottom: 1px solid var(--border);
+}
+.sidebar-logo .pre-title {
+  font-size: 0.65rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--gold);
+  font-weight: 600;
+  margin-bottom: 0.4rem;
+}
+.sidebar-logo h1 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.55rem;
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--heading);
+}
+.sidebar-logo h1 em { color: var(--gold); font-style: italic; }
+
+.search-wrap { padding: 1rem 1.2rem; border-bottom: 1px solid var(--border); }
+.search-input {
+  width: 100%;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  color: var(--text);
+  padding: 0.55rem 0.9rem;
+  border-radius: 8px;
+  font-family: 'Outfit', sans-serif;
+  font-size: 0.85rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.search-input::placeholder { color: var(--text-muted); }
+.search-input:focus { border-color: var(--gold); }
+
+.nav-section { padding: 0.9rem 1.2rem 0.4rem; }
+.nav-section-label {
+  font-size: 0.6rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--text-muted);
+  font-weight: 600;
+  margin-bottom: 0.4rem;
+}
+
+.nav-item {
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  padding: 0.5rem 0.8rem;
+  border-radius: 7px;
+  cursor: pointer;
+  transition: background 0.15s;
+  font-size: 0.85rem;
+  color: var(--text-dim);
+  margin-bottom: 2px;
+  border: none;
+  background: none;
+  width: 100%;
+  text-align: left;
+}
+.nav-item:hover { background: var(--surface2); color: var(--text); }
+.nav-item.active { background: var(--gold-dim); color: var(--gold-light); }
+.nav-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.nav-count {
+  margin-left: auto;
+  font-size: 0.7rem;
+  background: var(--surface2);
+  padding: 1px 7px;
+  border-radius: 20px;
+  color: var(--text-muted);
+}
+.nav-item.active .nav-count { background: rgba(201,168,76,0.2); color: var(--gold); }
+
+.sidebar-footer {
+  margin-top: auto;
+  padding: 1.2rem 1.5rem;
+  border-top: 1px solid var(--border);
+  font-size: 0.72rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+}
+
+/* ═══ MAIN ═══ */
+.main { margin-left: 280px; flex: 1; }
+
+/* ═══ HERO ═══ */
+.hero {
+  padding: 4rem 3rem 3rem;
+  border-bottom: 1px solid var(--border);
+  background: linear-gradient(135deg, var(--surface) 0%, var(--bg) 60%);
+  position: relative;
+  overflow: hidden;
+}
+.hero::before {
+  content: '';
+  position: absolute;
+  top: -50%; right: -10%;
+  width: 500px; height: 500px;
+  background: radial-gradient(circle, rgba(201,168,76,0.04) 0%, transparent 70%);
+  pointer-events: none;
+}
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  background: var(--gold-dim);
+  border: 1px solid rgba(201,168,76,0.3);
+  color: var(--gold-light);
+  padding: 0.3rem 0.9rem;
+  border-radius: 20px;
+  font-size: 0.75rem;
+  font-weight: 500;
+  letter-spacing: 0.05em;
+  margin-bottom: 1.2rem;
+}
+.hero h2 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 3.2rem;
+  font-weight: 600;
+  line-height: 1.1;
+  color: var(--heading);
+  margin-bottom: 1rem;
+}
+.hero h2 em { color: var(--gold); font-style: italic; }
+.hero p {
+  color: var(--text-dim);
+  font-size: 1rem;
+  max-width: 680px;
+  line-height: 1.7;
+  font-weight: 300;
+}
+.hero-stats {
+  display: flex;
+  gap: 2rem;
+  margin-top: 2rem;
+}
+.hero-stat { text-align: left; }
+.hero-stat .num {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 2rem;
+  font-weight: 600;
+  color: var(--gold-light);
+  line-height: 1;
+}
+.hero-stat .lbl {
+  font-size: 0.75rem;
+  color: var(--text-muted);
+  margin-top: 2px;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+/* ═══ CARDS GRID ═══ */
+.content { padding: 2.5rem 3rem; }
+.section-header {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  margin-bottom: 1.5rem;
+}
+.section-header h3 {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: var(--heading);
+}
+.section-header .count-badge {
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  color: var(--text-dim);
+  padding: 0.15rem 0.6rem;
+  border-radius: 12px;
+  font-size: 0.75rem;
+}
+
+.results-info {
+  font-size: 0.82rem;
+  color: var(--text-muted);
+  margin-bottom: 1.5rem;
+}
+.results-info strong { color: var(--text-dim); }
+
+.cards-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+  gap: 1.2rem;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  padding: 1.4rem;
+  cursor: pointer;
+  transition: all 0.2s;
+  position: relative;
+  overflow: hidden;
+}
+.card::before {
+  content: '';
+  position: absolute;
+  top: 0; left: 0; right: 0;
+  height: 3px;
+  border-radius: 14px 14px 0 0;
+  opacity: 0.7;
+}
+.card:hover {
+  background: var(--surface2);
+  border-color: var(--border2);
+  transform: translateY(-2px);
+  box-shadow: 0 12px 32px rgba(0,0,0,0.4);
+}
+
+.card-top {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 0.9rem;
+}
+.card-cat-pill {
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 0.2rem 0.6rem;
+  border-radius: 20px;
+  background: var(--surface2);
+}
+.card-diff {
+  display: flex;
+  gap: 3px;
+  align-items: center;
+}
+.diff-dot {
+  width: 6px; height: 6px;
+  border-radius: 50%;
+  background: var(--border2);
+}
+.diff-dot.active { background: var(--gold); }
+
+.card-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 1.3rem;
+  font-weight: 600;
+  color: var(--heading-card);
+  margin-bottom: 0.25rem;
+  line-height: 1.25;
+}
+.card-subtitle {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin-bottom: 0.8rem;
+}
+.card-excerpt {
+  font-size: 0.83rem;
+  color: var(--text-dim);
+  line-height: 1.6;
+  margin-bottom: 1rem;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.card-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+  margin-bottom: 0.9rem;
+}
+.tag {
+  font-size: 0.68rem;
+  padding: 0.15rem 0.55rem;
+  border-radius: 10px;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  color: var(--text-dim);
+  font-weight: 500;
+}
+
+.card-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-top: 0.8rem;
+  border-top: 1px solid var(--border);
+}
+.leakage-badge {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-size: 0.68rem;
+  font-weight: 600;
+  letter-spacing: 0.05em;
+}
+.leakage-badge.risk { color: #f87171; }
+.leakage-badge.safe { color: #34d399; }
+.leakage-dot { width: 6px; height: 6px; border-radius: 50%; }
+.leakage-dot.risk { background: #f87171; }
+.leakage-dot.safe { background: #34d399; }
+
+.card-open-btn {
+  font-size: 0.72rem;
+  color: var(--gold);
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+}
+
+/* ═══ MODAL ═══ */
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  background: rgba(5,10,20,0.88);
+  backdrop-filter: blur(6px);
+  z-index: 1000;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.25s;
+}
+.modal-overlay.open {
+  opacity: 1;
+  pointer-events: all;
+}
+.modal {
+  width: 720px;
+  max-width: 100vw;
+  height: 100vh;
+  background: var(--surface);
+  border-left: 1px solid var(--border2);
+  overflow-y: auto;
+  transform: translateX(60px);
+  transition: transform 0.3s cubic-bezier(0.16,1,0.3,1);
+  display: flex;
+  flex-direction: column;
+}
+.modal::-webkit-scrollbar { width: 4px; }
+.modal::-webkit-scrollbar-track { background: transparent; }
+.modal::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
+.modal-overlay.open .modal { transform: translateX(0); }
+
+.modal-hero {
+  padding: 2rem 2.2rem 1.5rem;
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  background: var(--surface);
+  z-index: 10;
+}
+.modal-close {
+  position: absolute;
+  top: 1.2rem; right: 1.5rem;
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  color: var(--text-dim);
+  width: 32px; height: 32px;
+  border-radius: 8px;
+  cursor: pointer;
+  font-size: 1rem;
+  display: flex; align-items: center; justify-content: center;
+  transition: all 0.15s;
+}
+.modal-close:hover { background: var(--border2); color: var(--text); }
+
+.modal-cat-pill {
+  font-size: 0.65rem;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 0.2rem 0.7rem;
+  border-radius: 20px;
+  margin-bottom: 0.8rem;
+  display: inline-block;
+}
+.modal-title {
+  font-family: 'Cormorant Garamond', serif;
+  font-size: 2rem;
+  font-weight: 600;
+  color: var(--heading);
+  line-height: 1.2;
+  margin-bottom: 0.4rem;
+}
+.modal-subtitle {
+  font-size: 0.88rem;
+  color: var(--text-muted);
+  margin-bottom: 1rem;
+}
+.modal-meta {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  flex-wrap: wrap;
+}
+.meta-item {
+  display: flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.75rem;
+  color: var(--text-dim);
+}
+.meta-item strong { color: var(--text); }
+
+/* TABS */
+.modal-tabs {
+  display: flex;
+  border-bottom: 1px solid var(--border);
+  padding: 0 2.2rem;
+  gap: 0;
+  background: var(--surface);
+  position: sticky;
+  top: 130px;
+  z-index: 9;
+}
+.tab-btn {
+  padding: 0.75rem 1.2rem;
+  font-size: 0.8rem;
+  font-weight: 500;
+  color: var(--text-muted);
+  cursor: pointer;
+  border: none;
+  background: none;
+  border-bottom: 2px solid transparent;
+  transition: all 0.15s;
+  font-family: 'Outfit', sans-serif;
+  letter-spacing: 0.03em;
+}
+.tab-btn:hover { color: var(--text-dim); }
+.tab-btn.active { color: var(--gold-light); border-bottom-color: var(--gold); }
+
+.modal-body { padding: 2rem 2.2rem; flex: 1; }
+
+.tab-panel { display: none; }
+.tab-panel.active { display: block; }
+
+/* Modal content blocks */
+.content-block { margin-bottom: 2rem; }
+.block-label {
+  font-size: 0.65rem;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--gold);
+  font-weight: 600;
+  margin-bottom: 0.7rem;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+.block-label::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: var(--border);
+}
+.block-text {
+  font-size: 0.9rem;
+  line-height: 1.75;
+  color: var(--text-dim);
+}
+.block-text strong { color: var(--text); font-weight: 500; }
+
+.use-list {
+  list-style: none;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+}
+.use-list li {
+  display: flex;
+  align-items: flex-start;
+  gap: 0.6rem;
+  font-size: 0.87rem;
+  color: var(--text-dim);
+  line-height: 1.5;
+}
+.use-list li .bullet {
+  width: 16px; height: 16px;
+  border-radius: 50%;
+  flex-shrink: 0;
+  margin-top: 2px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.6rem;
+}
+.use-list.good li .bullet { background: rgba(52,211,153,0.15); color: #34d399; }
+.use-list.bad li .bullet { background: rgba(248,113,113,0.15); color: #f87171; }
+
+.formula-box {
+  background: var(--code-bg);
+  border: 1px solid var(--border2);
+  border-radius: 12px;
+  padding: 1.4rem 1.6rem;
+  margin-bottom: 1rem;
+  text-align: center;
+  overflow-x: auto;
+  font-size: 1.05rem;
+  color: white;
+}
+.formula-note {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  line-height: 1.6;
+  margin-top: 0.7rem;
+  font-style: italic;
+  text-align: left;
+}
+.formula-vars {
+  margin-top: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+}
+.formula-var {
+  display: flex;
+  gap: 0.8rem;
+  font-size: 0.8rem;
+  align-items: baseline;
+}
+.formula-var .var-name {
+  font-family: 'JetBrains Mono', monospace;
+  color: var(--gold-light);
+  font-size: 0.78rem;
+  min-width: 80px;
+}
+.formula-var .var-desc { color: var(--text-muted); }
+
+pre {
+  background: var(--code-bg);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  padding: 1.4rem;
+  overflow-x: auto;
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.78rem;
+  line-height: 1.65;
+  color: #b8c9e0;
+  tab-size: 4;
+}
+.code-note {
+  font-size: 0.78rem;
+  color: var(--text-muted);
+  margin-top: 0.5rem;
+  padding-left: 0.4rem;
+  border-left: 2px solid var(--border2);
+  font-style: italic;
+}
+
+.kw { color: #c792ea; }
+.fn { color: #82aaff; }
+.st { color: #c3e88d; }
+.cm { color: #546e7a; font-style: italic; }
+.nm { color: #f78c6c; }
+.op { color: #89ddff; }
+
+.alert-box {
+  border-radius: 10px;
+  padding: 1rem 1.2rem;
+  font-size: 0.84rem;
+  line-height: 1.65;
+  margin-bottom: 0.8rem;
+  display: flex;
+  gap: 0.8rem;
+  align-items: flex-start;
+}
+.alert-box.danger {
+  background: rgba(248,113,113,0.08);
+  border: 1px solid rgba(248,113,113,0.2);
+  color: #fca5a5;
+}
+.alert-box.warning {
+  background: rgba(251,146,60,0.08);
+  border: 1px solid rgba(251,146,60,0.2);
+  color: #fdba74;
+}
+.alert-box.info {
+  background: rgba(79,156,249,0.08);
+  border: 1px solid rgba(79,156,249,0.2);
+  color: #93c5fd;
+}
+.alert-box .alert-icon { font-size: 1rem; flex-shrink: 0; margin-top: 0.05rem; }
+
+.complexity-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.8rem;
+  margin-bottom: 1rem;
+}
+.complexity-item {
+  background: var(--surface2);
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 0.8rem 1rem;
+}
+.complexity-item .c-label {
+  font-size: 0.65rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  color: var(--text-muted);
+  margin-bottom: 0.3rem;
+}
+.complexity-item .c-value {
+  font-family: 'JetBrains Mono', monospace;
+  font-size: 0.88rem;
+  color: var(--gold-light);
+}
+
+.alternatives-list {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+}
+.alt-tag {
+  background: var(--surface2);
+  border: 1px solid var(--border2);
+  color: var(--text-dim);
+  padding: 0.3rem 0.8rem;
+  border-radius: 20px;
+  font-size: 0.78rem;
+  cursor: pointer;
+  transition: all 0.15s;
+}
+.alt-tag:hover { border-color: var(--gold); color: var(--gold-light); }
+
+/* ═══ EMPTY STATE ═══ */
+.empty-state {
+  text-align: center;
+  padding: 5rem 2rem;
+  color: var(--text-muted);
+}
+.empty-state .icon { font-size: 2.5rem; margin-bottom: 1rem; opacity: 0.4; }
+.empty-state p { font-size: 0.9rem; }
+
+/* ═══ SCROLLBAR ═══ */
+::-webkit-scrollbar { width: 5px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 4px; }
+
+/* ═══ UTILITY ═══ */
+.hidden { display: none !important; }
+
+@media (max-width: 900px) {
+  .sidebar { width: 240px; }
+  .main { margin-left: 240px; }
+  .hero { padding: 2.5rem 1.8rem 2rem; }
+  .content { padding: 2rem 1.8rem; }
+  .hero h2 { font-size: 2.2rem; }
+  .modal { width: 100vw; }
+}
+
+/* Thème clair */
+[data-theme="light"] {
+  --bg: #f5f3ee;
+  --surface: #ffffff;
+  --surface2: #f0ede6;
+  --border: rgba(0,0,0,0.08);
+  --border2: rgba(0,0,0,0.14);
+  --text: #1a1a2e;
+  --text-dim: #3a3a5c;
+  --text-muted: #8888aa;
+  --code-bg: #1e1e2e;
+  --gold: #b8860b;
+  --gold-light: #a0740a;
+  --gold-dim: rgba(184,134,11,0.12);
+}
+
+/* Thème sombre bleu (actuel) — déjà dans :root */
+[data-theme="nord"] {
+  --bg: #1a1f2e;
+  --surface: #242936;
+  --gold: #88c0d0;
+  --gold-light: #a3c4d1;
+  /* ... */
+}
+
+.theme-toggle-wrap {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 1rem 1.5rem;
+  border-top: 1px solid var(--border);
+}
+.toggle-label { font-size: 0.72rem; color: var(--text-muted); }
+
+.toggle-switch { position: relative; cursor: pointer; }
+.toggle-switch input { display: none; }
+
+.toggle-track {
+  display: block;
+  width: 42px; height: 24px;
+  background: var(--border2);
+  border-radius: 99px;
+  transition: background 0.25s;
+  position: relative;
+}
+.toggle-switch input:checked ~ .toggle-track { background: var(--gold); }
+
+.toggle-thumb {
+  position: absolute;
+  top: 3px; left: 3px;
+  width: 18px; height: 18px;
+  background: white;
+  border-radius: 50%;
+  transition: transform 0.25s cubic-bezier(0.34,1.56,0.64,1);
+}
+.toggle-switch input:checked ~ .toggle-track .toggle-thumb {
+  transform: translateX(18px);
+}
+</style>
+</head>
+<body>
+
+<script>
+const DATA = {
+  categories: [
+    { id: "all",       label: "Toutes les techniques", color: "#c9a84c" },
+    { id: "encoding",  label: "Encodage catégoriel",   color: "#4f9cf9" },
+    { id: "transform", label: "Transformations",        color: "#a78bfa" },
+    { id: "crossing",  label: "Feature Crossing",       color: "#fb923c" },
+    { id: "binning",   label: "Discrétisation",         color: "#34d399" },
+    { id: "selection", label: "Sélection de features",  color: "#f87171" },
+    { id: "reduction", label: "Réduction dimensionnelle", color: "#818cf8" },
+    { id: "temporal",  label: "Features temporelles",   color: "#38bdf8" },
+    { id: "text",      label: "Features textuelles",    color: "#f59e0b" },
+    { id: "cluster",   label: "Features de clustering", color: "#e879f9" },
+    { id: "geo",       label: "Géospatial",             color: "#4ade80" },
+    { id: "missing",   label: "Données manquantes",     color: "#94a3b8" },
+    { id: "graph",     label: "Graphes & Réseaux",      color: "#60a5fa" },
+    { id: "packaging", label: "Auto Feature Engineering", color: "#fb7185" }
+  ],
+
+  techniques: [
+
+    // ═══ ENCODAGE ═══
+    {
+      id: "target-encoding",
+      category: "encoding",
+      title: "Target Encoding",
+      subtitle: "Lissage bayésien (James-Stein)",
+      difficulty: 2,
+      tags: ["haute cardinalité", "boosting", "arbres", "compétitions Kaggle"],
+      leakage_risk: true,
+      leakage_note: "Risque élevé de fuite de la cible si fit sur tout le train. Toujours utiliser K-Fold out-of-fold.",
+      principle: "Chaque modalité d'une variable catégorielle est remplacée par une statistique de la variable cible (moyenne, médiane, taux). Un lissage bayésien est appliqué pour éviter le surapprentissage sur les modalités rares : on combine la moyenne de la catégorie avec la moyenne globale, pondérées par le nombre d'observations de cette catégorie.",
+      when_to_use: [
+        "Variables avec très haute cardinalité (> 50 modalités) pour lesquelles le one-hot encoding serait prohibitif.",
+        "Modèles à base d'arbres (XGBoost, LightGBM, Random Forest) qui ne savent pas exploiter les patterns ordinaux.",
+        "Tâches de classification ou régression avec une cible numérique ou binaire clairement définie.",
+        "Compétitions Kaggle où chaque point de performance compte."
+      ],
+      when_not_to_use: [
+        "Modèles linéaires sans régularisation forte : le lissage ne suffit pas, l'encodage crée des features corrélées à la cible.",
+        "Jeux de données très petits : le bruit statistique domine, l'encodage sera non-informatif voire nuisible.",
+        "Variables ordinales à faible cardinalité : l'ordinal encoding ou le label encoding suffisent.",
+        "Quand la variable cible est fortement imbalancée sans ajustement : la moyenne brute reflète le déséquilibre, pas la discrimination."
+      ],
+      formalism: {
+        latex: "\\hat{y}_k = \\lambda_k \\cdot \\bar{y}_k + (1 - \\lambda_k) \\cdot \\bar{y}_{\\text{global}}, \\quad \\lambda_k = \\frac{n_k}{n_k + m}",
+        explanation: "Le facteur λ contrôle le compromis entre la statistique locale (catégorie k) et la statistique globale. Quand n_k → ∞, λ → 1 et on fait confiance à la moyenne locale. Quand n_k est petit, on rétrograde vers la moyenne globale.",
+        variables: [
+          { name: "ŷ_k", desc: "Valeur encodée pour la modalité k" },
+          { name: "ȳ_k", desc: "Moyenne de la cible pour la modalité k" },
+          { name: "ȳ_global", desc: "Moyenne globale de la cible" },
+          { name: "n_k", desc: "Nombre d'observations de la modalité k" },
+          { name: "m", desc: "Hyperparamètre de lissage (typiquement 10–100)" }
+        ]
+      },
+      implementation: `<span class="kw">from</span> sklearn.model_selection <span class="kw">import</span> KFold
+<span class="kw">from</span> category_encoders <span class="kw">import</span> TargetEncoder
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+
+<span class="cm"># ✅ Méthode correcte : Out-Of-Fold pour éviter le data leakage</span>
+<span class="kw">def</span> <span class="fn">target_encode_oof</span>(X_train, y_train, X_test, col, n_splits<span class="op">=</span><span class="nm">5</span>, smoothing<span class="op">=</span><span class="nm">10</span>):
+    oof_encoded <span class="op">=</span> np.zeros(len(X_train))
+    encoder <span class="op">=</span> TargetEncoder(smoothing<span class="op">=</span>smoothing)
+    kf <span class="op">=</span> KFold(n_splits<span class="op">=</span>n_splits, shuffle<span class="op">=</span><span class="kw">True</span>, random_state<span class="op">=</span><span class="nm">42</span>)
+    
+    <span class="kw">for</span> train_idx, val_idx <span class="kw">in</span> kf.split(X_train):
+        encoder.fit(X_train.iloc[train_idx][col], y_train.iloc[train_idx])
+        oof_encoded[val_idx] <span class="op">=</span> encoder.transform(X_train.iloc[val_idx][col]).values.ravel()
+    
+    <span class="cm"># Pour le test : fit sur tout le train</span>
+    encoder.fit(X_train[col], y_train)
+    X_test_enc <span class="op">=</span> encoder.transform(X_test[col]).values.ravel()
+    
+    <span class="kw">return</span> oof_encoded, X_test_enc
+
+X_train[<span class="st">'city_enc'</span>], X_test[<span class="st">'city_enc'</span>] <span class="op">=</span> target_encode_oof(
+    X_train, y_train, X_test, col<span class="op">=</span><span class="st">'city'</span>
+)`,
+      code_note: "Le paramètre smoothing (m) est crucial : une valeur trop faible → surapprentissage sur les catégories rares ; trop élevée → encodage trop lissé, perd de l'information.",
+      complexity: { time: "O(n·k)", space: "O(k)" },
+      references: ["Micci-Barreca (2001)", "category_encoders library", "Daniele Micci-Barreca (KDD 2001)"]
+    },
+
+    {
+      id: "woe-iv",
+      category: "encoding",
+      title: "Weight of Evidence + IV",
+      subtitle: "Encodage discriminant pour cible binaire",
+      difficulty: 2,
+      tags: ["credit scoring", "régression logistique", "cible binaire", "réglementaire"],
+      leakage_risk: true,
+      leakage_note: "WoE doit être calculé sur le train uniquement et appliqué au test. Ne jamais calculer les distributions Good/Bad sur l'ensemble complet.",
+      principle: "Le Weight of Evidence (WoE) mesure la force discriminante de chaque modalité d'une variable pour séparer deux classes (Good/Bad). Il se base sur le ratio des distributions conditionnelles de chaque classe. L'Information Value (IV) agrège le WoE sur toutes les modalités pour évaluer la puissance prédictive globale de la variable.",
+      when_to_use: [
+        "Scoring de crédit, détection de fraude : contextes réglementairement sensibles où l'interprétabilité est obligatoire.",
+        "Variables avec relation non-monotone à la cible : WoE peut capturer des patterns non-linéaires pour les modèles linéaires.",
+        "Pré-sélection de variables : l'IV permet de classer rapidement les features par pouvoir prédictif.",
+        "Modèles de régression logistique exigeant une relation linéaire avec le log-odds."
+      ],
+      when_not_to_use: [
+        "Cible non-binaire : WoE n'est défini que pour la classification binaire.",
+        "Très haute cardinalité sans binning préalable : les bins doivent avoir un effectif minimum (règle empirique : ≥ 5% par bin).",
+        "Modèles ensemblistes à base d'arbres : ces modèles capturent déjà les non-linéarités sans encodage WoE."
+      ],
+      formalism: {
+        latex: "WoE_k = \\ln\\left(\\frac{P(X=k | Y=1)}{P(X=k | Y=0)}\\right), \\quad IV = \\sum_k (p_k^+ - p_k^-) \\cdot WoE_k",
+        explanation: "Un WoE positif indique une surreprésentation des 'bons' (Y=1) dans la modalité k. L'IV quantifie le pouvoir prédictif global : IV < 0.02 = négligeable, 0.02–0.1 = faible, 0.1–0.3 = modéré, > 0.3 = fort.",
+        variables: [
+          { name: "p_k⁺", desc: "P(X=k | Y=1) : proportion des positifs dans la modalité k" },
+          { name: "p_k⁻", desc: "P(X=k | Y=0) : proportion des négatifs dans la modalité k" },
+          { name: "IV", desc: "Information Value : indicateur du pouvoir prédictif global (> 0.3 = fort)" }
+        ]
+      },
+      implementation: `<span class="kw">import</span> pandas <span class="kw">as</span> pd
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+
+<span class="kw">def</span> <span class="fn">compute_woe_iv</span>(df, feature, target, epsilon<span class="op">=</span><span class="nm">1e-6</span>):
+    <span class="st">"""Calcule WoE et IV pour une variable catégorielle."""</span>
+    stats <span class="op">=</span> df.groupby(feature)[target].agg([<span class="st">'sum'</span>, <span class="st">'count'</span>])
+    stats.columns <span class="op">=</span> [<span class="st">'events'</span>, <span class="st">'total'</span>]
+    stats[<span class="st">'non_events'</span>] <span class="op">=</span> stats[<span class="st">'total'</span>] <span class="op">-</span> stats[<span class="st">'events'</span>]
+    
+    total_events    <span class="op">=</span> stats[<span class="st">'events'</span>].sum()
+    total_nonevents <span class="op">=</span> stats[<span class="st">'non_events'</span>].sum()
+    
+    stats[<span class="st">'p_event'</span>]    <span class="op">=</span> (stats[<span class="st">'events'</span>] <span class="op">+</span> epsilon) <span class="op">/</span> total_events
+    stats[<span class="st">'p_nonevent'</span>] <span class="op">=</span> (stats[<span class="st">'non_events'</span>] <span class="op">+</span> epsilon) <span class="op">/</span> total_nonevents
+    
+    stats[<span class="st">'woe'</span>] <span class="op">=</span> np.log(stats[<span class="st">'p_event'</span>] <span class="op">/</span> stats[<span class="st">'p_nonevent'</span>])
+    stats[<span class="st">'iv'</span>]  <span class="op">=</span> (stats[<span class="st">'p_event'</span>] <span class="op">-</span> stats[<span class="st">'p_nonevent'</span>]) <span class="op">*</span> stats[<span class="st">'woe'</span>]
+    
+    IV_total <span class="op">=</span> stats[<span class="st">'iv'</span>].sum()
+    woe_map  <span class="op">=</span> stats[<span class="st">'woe'</span>].to_dict()
+    
+    <span class="cm"># Appliquer l'encodage WoE</span>
+    df[f<span class="st">'{feature}_woe'</span>] <span class="op">=</span> df[feature].map(woe_map)
+    
+    print(f<span class="st">"IV({feature}) = {IV_total:.4f} → "</span>, end<span class="op">=</span><span class="st">""</span>)
+    <span class="kw">if</span>   IV_total <span class="op">&lt;</span> <span class="nm">0.02</span>: print(<span class="st">"⚠ Négligeable"</span>)
+    <span class="kw">elif</span> IV_total <span class="op">&lt;</span> <span class="nm">0.10</span>: print(<span class="st">"→ Pouvoir faible"</span>)
+    <span class="kw">elif</span> IV_total <span class="op">&lt;</span> <span class="nm">0.30</span>: print(<span class="st">"→ Pouvoir modéré"</span>)
+    <span class="kw">else</span>:                  print(<span class="st">"✅ Pouvoir fort"</span>)
+    
+    <span class="kw">return</span> stats, IV_total`,
+      code_note: "Toujours appliquer un binning préalable sur les variables continues avant de calculer le WoE. La library optbinning automatise ce processus avec optimisation supervisée.",
+      complexity: { time: "O(n + k)", space: "O(k)" },
+      references: ["Siddiqi (2006)", "optbinning library", "Basel II/III scorecard methodology"]
+    },
+
+    {
+      id: "frequency-encoding",
+      category: "encoding",
+      title: "Count / Frequency Encoding",
+      subtitle: "Encodage par fréquence d'occurrence",
+      difficulty: 1,
+      tags: ["haute cardinalité", "quick win", "tout modèle", "streaming"],
+      leakage_risk: false,
+      leakage_note: "Pas de risque de fuite : la fréquence est calculée sur X uniquement, sans la cible.",
+      principle: "Chaque modalité est remplacée par sa fréquence d'apparition dans le jeu d'entraînement (count ou proportion). Technique simple mais souvent surprenante d'efficacité, surtout dans les modèles à base d'arbres qui peuvent ainsi capturer l'importance relative des catégories.",
+      when_to_use: [
+        "Première baseline rapide sur des données avec des variables catégorielles à haute cardinalité.",
+        "Variables où la fréquence est un signal pertinent (ex: produit rare vs. courant).",
+        "Streaming et production : facile à calculer et à mettre à jour incrémentalement.",
+        "Combiné avec d'autres encodages pour enrichir la représentation."
+      ],
+      when_not_to_use: [
+        "Quand deux modalités ont la même fréquence mais des rôles très différents : les fréquences identiques créent des collisions.",
+        "Ne capture pas la relation avec la cible : insuffisant seul pour des tâches complexes."
+      ],
+      formalism: {
+        latex: "f_k = \\frac{n_k}{N}, \\quad \\text{ou} \\quad c_k = n_k",
+        explanation: "f_k est la fréquence relative de la modalité k, c_k son comptage absolu. Les deux encodages sont équivalents (lien linéaire), mais la fréquence relative est plus stable entre datasets de tailles différentes.",
+        variables: [
+          { name: "n_k", desc: "Nombre d'occurrences de la modalité k dans le train" },
+          { name: "N", desc: "Nombre total d'observations" },
+          { name: "f_k", desc: "Fréquence relative ∈ [0, 1]" }
+        ]
+      },
+      implementation: `<span class="kw">import</span> pandas <span class="kw">as</span> pd
+
+<span class="cm"># Calculer la fréquence sur le TRAIN uniquement</span>
+freq_map <span class="op">=</span> X_train[<span class="st">'city'</span>].value_counts(normalize<span class="op">=</span><span class="kw">True</span>)
+
+X_train[<span class="st">'city_freq'</span>] <span class="op">=</span> X_train[<span class="st">'city'</span>].map(freq_map)
+X_test[<span class="st">'city_freq'</span>]  <span class="op">=</span> X_test[<span class="st">'city'</span>].map(freq_map).fillna(<span class="nm">0</span>)
+
+<span class="cm"># Variante : rank encoding (évite les collisions de fréquences)</span>
+rank_map <span class="op">=</span> {k: i <span class="kw">for</span> i, k <span class="kw">in</span> enumerate(freq_map.index)}
+X_train[<span class="st">'city_rank'</span>] <span class="op">=</span> X_train[<span class="st">'city'</span>].map(rank_map)
+
+<span class="cm"># Combinaison : freq + count comme deux features distinctes</span>
+count_map <span class="op">=</span> X_train[<span class="st">'city'</span>].value_counts()
+X_train[<span class="st">'city_count'</span>] <span class="op">=</span> X_train[<span class="st">'city'</span>].map(count_map)`,
+      code_note: "Toujours calculer la fréquence sur X_train, jamais sur X_test. Pour les nouvelles catégories inconnues au test, imputer par 0 ou par la fréquence minimale observée.",
+      complexity: { time: "O(n)", space: "O(k)" },
+      references: ["Kaggle grandmaster techniques", "Banachewicz & Abbott (2022)"]
+    },
+
+    {
+      id: "feature-hashing",
+      category: "encoding",
+      title: "Feature Hashing",
+      subtitle: "Hashing Trick — projection en espace fixe",
+      difficulty: 2,
+      tags: ["très haute cardinalité", "streaming", "NLP", "mémoire contrainte"],
+      leakage_risk: false,
+      leakage_note: "Sans utilisation de la cible, le hashing est sans risque de fuite.",
+      principle: "Au lieu de maintenir un dictionnaire de toutes les modalités, chaque catégorie est projetée dans un vecteur de taille fixe D via une fonction de hachage. Des collisions (deux catégories mappées au même index) peuvent survenir, mais restent acceptables en pratique si D est suffisamment grand. Avantage clé : pas de dictionnaire à maintenir, gestion native des nouvelles catégories.",
+      when_to_use: [
+        "Vocabulaire potentiellement infini ou en croissance (n-grammes de texte, identifiants utilisateurs, URLs).",
+        "Environnements de streaming où l'on ne peut pas maintenir un dictionnaire complet.",
+        "Contraintes mémoire sévères : contrôle précis de la dimension avec le paramètre D.",
+        "Systèmes de recommandation à très grande échelle (millions d'items)."
+      ],
+      when_not_to_use: [
+        "Quand l'interprétabilité est requise : les collisions rendent impossible l'association feature → catégorie.",
+        "Données avec peu de modalités (< 1000) : un encodage standard est plus précis et sans perte."
+      ],
+      formalism: {
+        latex: "\\phi(x)_j = \\sum_{i : h(x_i) = j} \\text{sign}(x_i) \\cdot v_i, \\quad j \\in \\{0, \\ldots, D-1\\}",
+        explanation: "h() est la fonction de hachage (ex: MurmurHash3). Le signe est ajouté pour réduire le biais dû aux collisions (technique de signed hashing). La probabilité de collision est ≈ k/D pour k catégories dans D buckets.",
+        variables: [
+          { name: "D", desc: "Dimension du vecteur de sortie (hyperparamètre, puissance de 2 recommandée)" },
+          { name: "h(x_i)", desc: "Indice du bucket pour la feature x_i" },
+          { name: "sign(x_i)", desc: "Signe optionnel pour réduire le biais de collision" }
+        ]
+      },
+      implementation: `<span class="kw">from</span> sklearn.feature_extraction <span class="kw">import</span> FeatureHasher
+
+<span class="cm"># Pour des données catégorielles sous forme de liste de dicts</span>
+hasher <span class="op">=</span> FeatureHasher(n_features<span class="op">=</span><span class="nm">2</span><span class="op">**</span><span class="nm">14</span>, input_type<span class="op">=</span><span class="st">'string'</span>)
+X_hashed <span class="op">=</span> hasher.transform(df[<span class="st">'category'</span>].astype(str))
+
+<span class="cm"># Avec hashlib pour contrôle total</span>
+<span class="kw">import</span> hashlib
+
+<span class="kw">def</span> <span class="fn">hash_encode</span>(value, n_buckets<span class="op">=</span><span class="nm">1024</span>):
+    h <span class="op">=</span> int(hashlib.md5(str(value).encode()).hexdigest(), <span class="nm">16</span>)
+    <span class="kw">return</span> h <span class="op">%</span> n_buckets
+
+df[<span class="st">'cat_hashed'</span>] <span class="op">=</span> df[<span class="st">'category'</span>].apply(hash_encode)
+
+<span class="cm"># Conseil : choisir D = 2^k pour optimiser les performances de hachage</span>
+<span class="cm"># D = 2^14 = 16384 est un bon défaut pour la plupart des cas</span>`,
+      code_note: "Augmenter D réduit les collisions mais augmente la mémoire. La règle empirique : D ≈ 10 × (nombre de catégories attendues).",
+      complexity: { time: "O(n)", space: "O(D) constant" },
+      references: ["Weinberger et al. (2009) — Feature Hashing for Large Scale Multitask Learning", "Vowpal Wabbit"]
+    },
+
+    // ═══ TRANSFORMATIONS ═══
+    {
+      id: "yeo-johnson",
+      category: "transform",
+      title: "Transformation Yeo-Johnson",
+      subtitle: "Généralisation de Box-Cox pour toutes valeurs réelles",
+      difficulty: 2,
+      tags: ["normalisation", "stabilisation variance", "régression", "valeurs négatives"],
+      leakage_risk: true,
+      leakage_note: "Fit uniquement sur X_train. Appliquer .transform() sur X_test sans re-fitter.",
+      principle: "Transformation paramétrique qui stabilise la variance et réduit l'asymétrie des distributions. Contrairement à Box-Cox, elle accepte les valeurs nulles et négatives. Le paramètre λ est estimé par maximum de vraisemblance. Pour λ=1, c'est une translation (identité). Pour λ=0, c'est le logarithme.",
+      when_to_use: [
+        "Variables numériques fortement asymétriques (skewness > 1 ou < -1) comme les revenus, surfaces, durées.",
+        "Modèles linéaires (régression, SVM, KNN) qui supposent une distribution approximativement gaussienne des features.",
+        "Présence de valeurs nulles ou négatives qui interdisent Box-Cox.",
+        "Avant une ACP pour satisfaire l'hypothèse de normalité approximative."
+      ],
+      when_not_to_use: [
+        "Modèles à base d'arbres (Random Forest, XGBoost) : la monotonie des splits rend la transformation inutile.",
+        "Distributions multimodales : Yeo-Johnson ne résoudra pas la multimodalité, seul le binning le peut."
+      ],
+      formalism: {
+        latex: "\\psi(y, \\lambda) = \\begin{cases} \\frac{(y+1)^\\lambda - 1}{\\lambda} & y \\geq 0, \\lambda \\neq 0 \\\\ \\ln(y+1) & y \\geq 0, \\lambda = 0 \\\\ -\\frac{(-y+1)^{2-\\lambda}-1}{2-\\lambda} & y < 0, \\lambda \\neq 2 \\\\ -\\ln(-y+1) & y < 0, \\lambda = 2 \\end{cases}",
+        explanation: "λ est estimé par MLE. La transformation est monotone pour tout λ, ce qui préserve l'ordre des observations. Après transformation, on applique généralement une standardisation (μ=0, σ=1).",
+        variables: [
+          { name: "λ", desc: "Paramètre de la transformation, estimé par MLE sur les données d'entraînement" },
+          { name: "y", desc: "Valeur originale ∈ ℝ (valeurs négatives et nulles acceptées)" },
+          { name: "ψ(y,λ)", desc: "Valeur transformée, approximativement gaussienne si λ optimal" }
+        ]
+      },
+      implementation: `<span class="kw">from</span> sklearn.preprocessing <span class="kw">import</span> PowerTransformer
+<span class="kw">from</span> scipy.stats <span class="kw">import</span> skew
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+
+<span class="cm"># Sélectionner les colonnes très asymétriques</span>
+numeric_cols <span class="op">=</span> X_train.select_dtypes(<span class="st">'number'</span>).columns
+skewed_cols  <span class="op">=</span> [c <span class="kw">for</span> c <span class="kw">in</span> numeric_cols
+                <span class="kw">if</span> abs(skew(X_train[c].dropna())) <span class="op">&gt;</span> <span class="nm">0.75</span>]
+
+<span class="cm"># Yeo-Johnson — fit sur train uniquement</span>
+pt <span class="op">=</span> PowerTransformer(method<span class="op">=</span><span class="st">'yeo-johnson'</span>, standardize<span class="op">=</span><span class="kw">True</span>)
+pt.fit(X_train[skewed_cols])
+
+X_train[skewed_cols] <span class="op">=</span> pt.transform(X_train[skewed_cols])
+X_test[skewed_cols]  <span class="op">=</span> pt.transform(X_test[skewed_cols])
+
+<span class="cm"># Vérifier le résultat</span>
+<span class="kw">for</span> c <span class="kw">in</span> skewed_cols:
+    print(f<span class="st">"{c}: skew avant = {skew(X_train[c]):.2f}"</span>)`,
+      code_note: "Le paramètre standardize=True centre et réduit la distribution après transformation, ce qui est nécessaire pour la plupart des modèles. Les lambdas estimés sont accessibles via pt.lambdas_.",
+      complexity: { time: "O(n·p·log n)", space: "O(p)" },
+      references: ["Yeo & Johnson (2000) — Biometrika", "sklearn.preprocessing.PowerTransformer"]
+    },
+
+    {
+      id: "quantile-transformer",
+      category: "transform",
+      title: "Quantile Transformer",
+      subtitle: "Projection sur distribution cible via quantiles empiriques",
+      difficulty: 1,
+      tags: ["outliers robuste", "SVM", "KNN", "distribution normale forcée"],
+      leakage_risk: true,
+      leakage_note: "Fit sur X_train uniquement. Extrapolation linéaire pour les valeurs hors des quantiles vus au train.",
+      principle: "Chaque valeur est transformée par sa position dans la distribution empirique (rang normalisé), puis projetée sur une distribution cible (uniforme ou normale). Cette transformation est non-paramétrique et ne fait aucune hypothèse sur la distribution originale. Elle est insensible aux valeurs extrêmes car seuls les rangs importent.",
+      when_to_use: [
+        "Présence d'outliers extrêmes qui ne peuvent pas être simplement clippés ou supprimés.",
+        "Algorithmes sensibles à l'échelle et à la distribution : SVM, KNN, réseaux de neurones.",
+        "Nécessité absolue d'une distribution gaussienne (tests statistiques, ACP sur données non-gaussiennes).",
+        "Données hétérogènes mélangeant des colonnes avec des distributions très différentes."
+      ],
+      when_not_to_use: [
+        "Petit échantillon (< 1000 obs.) : les quantiles empiriques sont peu fiables.",
+        "Données de test avec queues de distribution très différentes du train : extrapolation risquée.",
+        "Arbres de décision : transformation monotone n'apporte rien."
+      ],
+      formalism: {
+        latex: "x_{\\text{new}} = F_{\\text{target}}^{-1}\\left(\\hat{F}_{\\text{emp}}(x)\\right)",
+        explanation: "F̂_emp est la CDF empirique des données. F⁻¹_target est la CDF inverse de la distribution cible (Φ⁻¹ pour la normale). La composition donne une transformation qui mappe exactement la distribution empirique vers la cible.",
+        variables: [
+          { name: "F̂_emp(x)", desc: "CDF empirique : rang de x divisé par n (∈ [0,1])" },
+          { name: "F⁻¹_target", desc: "Fonction quantile de la distribution cible (Φ⁻¹ pour la normale)" },
+          { name: "n_quantiles", desc: "Nombre de quantiles à estimer (défaut 1000, limité par n)" }
+        ]
+      },
+      implementation: `<span class="kw">from</span> sklearn.preprocessing <span class="kw">import</span> QuantileTransformer
+
+<span class="cm"># Sortie gaussienne — recommandé pour SVM, KNN</span>
+qt_normal <span class="op">=</span> QuantileTransformer(
+    output_distribution<span class="op">=</span><span class="st">'normal'</span>,
+    n_quantiles<span class="op">=</span>min(<span class="nm">1000</span>, len(X_train)),
+    random_state<span class="op">=</span><span class="nm">42</span>
+)
+
+<span class="cm"># Sortie uniforme — utile pour certains algorithmes</span>
+qt_uniform <span class="op">=</span> QuantileTransformer(
+    output_distribution<span class="op">=</span><span class="st">'uniform'</span>,
+    n_quantiles<span class="op">=</span><span class="nm">1000</span>
+)
+
+qt_normal.fit(X_train[[<span class="st">'revenue'</span>, <span class="st">'age'</span>]])
+X_train_qt <span class="op">=</span> qt_normal.transform(X_train[[<span class="st">'revenue'</span>, <span class="st">'age'</span>]])
+X_test_qt  <span class="op">=</span> qt_normal.transform(X_test[[<span class="st">'revenue'</span>, <span class="st">'age'</span>]])
+
+<span class="cm"># Dans un pipeline sklearn (recommandé)</span>
+<span class="kw">from</span> sklearn.pipeline <span class="kw">import</span> Pipeline
+<span class="kw">from</span> sklearn.svm <span class="kw">import</span> SVR
+
+pipe <span class="op">=</span> Pipeline([
+    (<span class="st">'qt'</span>, QuantileTransformer(output_distribution<span class="op">=</span><span class="st">'normal'</span>)),
+    (<span class="st">'model'</span>, SVR())
+])`,
+      code_note: "n_quantiles est borné à min(n_quantiles, n_train_samples). Sur de petits datasets, augmenter n_quantiles n'apporte rien.",
+      complexity: { time: "O(n·log n + n_quantiles)", space: "O(n_quantiles)" },
+      references: ["sklearn.preprocessing.QuantileTransformer", "Transformations non-paramétriques"]
+    },
+
+    {
+      id: "winsorizing",
+      category: "transform",
+      title: "Clipping / Winsorizing",
+      subtitle: "Remplacement des valeurs extrêmes par des percentiles",
+      difficulty: 1,
+      tags: ["outliers", "robustesse", "pré-traitement", "simple"],
+      leakage_risk: true,
+      leakage_note: "Les percentiles de clipping doivent être calculés sur X_train uniquement.",
+      principle: "Les valeurs en dehors d'un intervalle [p_low, p_high] sont remplacées (ou supprimées dans la version stricte) par les bornes de l'intervalle. Le Winsorizing remplace par les percentiles, le clipping dur remplace par des constantes. Cette opération préserve l'ordre et ne crée pas de nouvelles distributions artificielles comme le Quantile Transformer.",
+      when_to_use: [
+        "Outliers clairement identifiables comme erreurs de saisie ou aberrations métier.",
+        "Régression linéaire et modèles linéaires généraux où les outliers inflatent artificiellement la perte.",
+        "Avant un StandardScaler pour éviter que les outliers perturbent la normalisation.",
+        "Données financières avec queues épaisses : cours extrêmes, volumes anormaux."
+      ],
+      when_not_to_use: [
+        "Quand les valeurs extrêmes sont informatives (détection d'anomalies, fraude : l'outlier EST le signal).",
+        "Méthodes robustes (Median, MAD) : ne nécessitent pas de clipping."
+      ],
+      formalism: {
+        latex: "x_{\\text{clip}} = \\min\\left(\\max(x, q_{\\alpha}), q_{1-\\alpha}\\right)",
+        explanation: "q_α et q_{1-α} sont les quantiles d'ordre α et 1-α calculés sur les données d'entraînement. α=0.01 (1ème et 99ème percentile) est le choix le plus courant.",
+        variables: [
+          { name: "q_α", desc: "Quantile inférieur (ex: 1er percentile pour α=0.01)" },
+          { name: "q_{1-α}", desc: "Quantile supérieur (ex: 99ème percentile)" }
+        ]
+      },
+      implementation: `<span class="kw">import</span> pandas <span class="kw">as</span> pd
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+
+<span class="kw">def</span> <span class="fn">winsorize_fit_transform</span>(X_train, X_test, cols, alpha<span class="op">=</span><span class="nm">0.01</span>):
+    bounds <span class="op">=</span> {}
+    <span class="kw">for</span> col <span class="kw">in</span> cols:
+        lo <span class="op">=</span> X_train[col].quantile(alpha)
+        hi <span class="op">=</span> X_train[col].quantile(<span class="nm">1</span> <span class="op">-</span> alpha)
+        bounds[col] <span class="op">=</span> (lo, hi)
+        X_train[col] <span class="op">=</span> X_train[col].clip(lo, hi)
+        X_test[col]  <span class="op">=</span> X_test[col].clip(lo, hi)
+    <span class="kw">return</span> X_train, X_test, bounds
+
+<span class="cm"># Utilisation</span>
+num_cols <span class="op">=</span> [<span class="st">'revenue'</span>, <span class="st">'age'</span>, <span class="st">'nb_transactions'</span>]
+X_train, X_test, bounds <span class="op">=</span> winsorize_fit_transform(X_train, X_test, num_cols)`,
+      code_note: "Pour les données financières, α=0.01 est standard. Pour la détection d'anomalies, ne jamais winsorizer la variable à prédire.",
+      complexity: { time: "O(n)", space: "O(p)" },
+      references: ["Tukey (1977) — Exploratory Data Analysis", "scipy.stats.mstats.winsorize"]
+    },
+
+    // ═══ FEATURE CROSSING ═══
+    {
+      id: "groupby-aggregations",
+      category: "crossing",
+      title: "Group-By Aggregations",
+      subtitle: "Features statistiques par groupe d'entités",
+      difficulty: 2,
+      tags: ["Kaggle", "données tabulaires", "entités relationnelles", "très puissant"],
+      leakage_risk: true,
+      leakage_note: "Calculer les agrégats sur X_train uniquement, puis joindre sur X_test via la clé de groupe. Ne jamais inclure la target dans les agrégats.",
+      principle: "Pour chaque observation, on calcule des statistiques (moyenne, écart-type, min, max, médiane, count, skewness) d'une variable numérique regroupée par une variable catégorielle (ex: moyenne des transactions par client, écart-type des prix par marque). C'est la technique la plus puissante et la plus systématiquement sous-utilisée en feature engineering tabulaire.",
+      when_to_use: [
+        "Données relationnelles où une entité (client, produit, région) apparaît plusieurs fois.",
+        "Pratiquement toujours utile dans les compétitions Kaggle sur données tabulaires : souvent dans le top-5 des features importantes.",
+        "Quand on veut encoder des informations contextuelles (comportement moyen d'un groupe).",
+        "Détection de fraude : écart d'une transaction par rapport à la moyenne habituelle du client."
+      ],
+      when_not_to_use: [
+        "Groupes de très petite taille (n < 5) : les statistiques sont peu fiables, ajouter un indicateur de fiabilité.",
+        "Données cross-sectionnelles sans notion de groupe naturel."
+      ],
+      formalism: {
+        latex: "f_{\\text{agg}}(i) = \\text{agg}_{j: g(j)=g(i)}(x_j), \\quad \\text{agg} \\in \\{\\mu, \\sigma, \\text{min}, \\text{max}, Q_{0.5}, \\ldots\\}",
+        explanation: "Pour chaque observation i, la feature agrégée est la statistique de toutes les observations j appartenant au même groupe g(i). La combinaison (x_i - μ_groupe) / σ_groupe est particulièrement puissante car elle mesure l'écart standardisé à la norme du groupe.",
+        variables: [
+          { name: "g(i)", desc: "Groupe de l'observation i (ex: client_id, region, brand)" },
+          { name: "agg", desc: "Fonction d'agrégation : mean, std, min, max, median, count, skew" }
+        ]
+      },
+      implementation: `<span class="kw">import</span> pandas <span class="kw">as</span> pd
+
+<span class="cm"># Agrégats de base : calculer sur TRAIN uniquement</span>
+agg_stats <span class="op">=</span> X_train.groupby(<span class="st">'client_id'</span>)[<span class="st">'montant'</span>].agg(
+    montant_mean<span class="op">=</span><span class="st">'mean'</span>, montant_std<span class="op">=</span><span class="st">'std'</span>,
+    montant_min<span class="op">=</span><span class="st">'min'</span>, montant_max<span class="op">=</span><span class="st">'max'</span>,
+    montant_count<span class="op">=</span><span class="st">'count'</span>, montant_median<span class="op">=</span><span class="st">'median'</span>
+).reset_index()
+
+X_train <span class="op">=</span> X_train.merge(agg_stats, on<span class="op">=</span><span class="st">'client_id'</span>, how<span class="op">=</span><span class="st">'left'</span>)
+X_test  <span class="op">=</span> X_test.merge(agg_stats, on<span class="op">=</span><span class="st">'client_id'</span>, how<span class="op">=</span><span class="st">'left'</span>)
+
+<span class="cm"># ✅ Feature puissante : z-score par groupe (déviation à la norme)</span>
+X_train[<span class="st">'montant_zscore'</span>] <span class="op">=</span> (
+    (X_train[<span class="st">'montant'</span>] <span class="op">-</span> X_train[<span class="st">'montant_mean'</span>])
+    <span class="op">/</span> (X_train[<span class="st">'montant_std'</span>] <span class="op">+</span> <span class="nm">1e-6</span>)
+)
+
+<span class="cm"># Agrégats croisés : double groupby</span>
+cross_agg <span class="op">=</span> X_train.groupby([<span class="st">'client_id'</span>, <span class="st">'category'</span>])[<span class="st">'montant'</span>] \
+    .agg([<span class="st">'mean'</span>, <span class="st">'count'</span>]).reset_index()
+cross_agg.columns <span class="op">=</span> [<span class="st">'client_id'</span>, <span class="st">'category'</span>, <span class="st">'mean_client_cat'</span>, <span class="st">'count_client_cat'</span>]`,
+      code_note: "Systématiser avec un double for-loop : pour chaque paire (groupby_col, agg_col) × (agrégat). Attention à l'explosion du nombre de features : utiliser une sélection ensuite.",
+      complexity: { time: "O(n·log n)", space: "O(k·p)" },
+      references: ["Kaggle Feature Engineering course", "Banachewicz & Abbott (2022) — The Kaggle Book"]
+    },
+
+    {
+      id: "polynomial-features",
+      category: "crossing",
+      title: "Polynomial Features",
+      subtitle: "Interactions multiplicatives de degré d",
+      difficulty: 2,
+      tags: ["interactions", "modèles linéaires", "explosion dimensionnelle", "Lasso"],
+      leakage_risk: false,
+      leakage_note: "Pas de risque de fuite : transformation déterministe sans utilisation de la cible.",
+      principle: "Génère toutes les combinaisons multiplicatives jusqu'au degré d entre les features d'entrée. Pour d=2 et p features, on obtient p + p(p+1)/2 features. Ces features permettent aux modèles linéaires de capturer des interactions non-linéaires entre variables. La régularisation (Lasso, Ridge) est indispensable pour contrôler l'explosion dimensionnelle.",
+      when_to_use: [
+        "Modèles linéaires qui doivent capturer des interactions (régression logistique, SVM linéaire).",
+        "Petit nombre de features pertinentes (< 20) avant expansion polynomiale.",
+        "Connaissance métier suggérant des interactions spécifiques entre variables.",
+        "Combiné avec Lasso pour sélection automatique des interactions pertinentes."
+      ],
+      when_not_to_use: [
+        "Grand nombre de features (p > 50) : le nombre de termes devient incontrôlable (O(p^d)).",
+        "Arbres de décision : capturent déjà les interactions, les features polynomiales sont redondantes.",
+        "Sans régularisation : le modèle surapprendera systématiquement."
+      ],
+      formalism: {
+        latex: "\\Phi(\\mathbf{x}) = [1, x_1, x_2, \\ldots, x_p, x_1^2, x_1 x_2, \\ldots, x_p^2, x_1^3, \\ldots]",
+        explanation: "Pour d=2 et p features : sortie de dimension 1 + p + p(p+1)/2. Pour p=10 : 66 features. Pour p=100 : 5151 features. La dimension explose en O(p^d/d!).",
+        variables: [
+          { name: "d", desc: "Degré maximal des termes polynomiaux (en pratique, ≤ 3)" },
+          { name: "p", desc: "Nombre de features en entrée" },
+          { name: "|Φ(x)|", desc: "C(p+d, d) : nombre de features en sortie (combinaisons avec répétition)" }
+        ]
+      },
+      implementation: `<span class="kw">from</span> sklearn.preprocessing <span class="kw">import</span> PolynomialFeatures
+<span class="kw">from</span> sklearn.linear_model <span class="kw">import</span> Lasso
+<span class="kw">from</span> sklearn.pipeline <span class="kw">import</span> Pipeline
+
+<span class="cm"># Pipeline standard : poly → Lasso (indispensable)</span>
+pipe <span class="op">=</span> Pipeline([
+    (<span class="st">'poly'</span>, PolynomialFeatures(degree<span class="op">=</span><span class="nm">2</span>, include_bias<span class="op">=</span><span class="kw">False</span>, interaction_only<span class="op">=</span><span class="kw">False</span>)),
+    (<span class="st">'model'</span>, Lasso(alpha<span class="op">=</span><span class="nm">0.01</span>))
+])
+pipe.fit(X_train, y_train)
+
+<span class="cm"># Voir les features créées</span>
+poly <span class="op">=</span> PolynomialFeatures(degree<span class="op">=</span><span class="nm">2</span>, include_bias<span class="op">=</span><span class="kw">False</span>)
+poly.fit(X_train)
+print(poly.get_feature_names_out())
+
+<span class="cm"># Interactions seulement (sans termes carrés x_i²)</span>
+poly_inter <span class="op">=</span> PolynomialFeatures(degree<span class="op">=</span><span class="nm">2</span>, interaction_only<span class="op">=</span><span class="kw">True</span>, include_bias<span class="op">=</span><span class="kw">False</span>)
+<span class="cm"># p=10 → 45 interactions (au lieu de 65 termes complets)</span>`,
+      code_note: "interaction_only=True réduit fortement le nombre de features (C(p,2) au lieu de C(p+2,2)-1) en n'incluant que les produits croisés, sans les termes carrés.",
+      complexity: { time: "O(n·p^d)", space: "O(C(p+d,d))" },
+      references: ["Hastie, Tibshirani & Friedman (2009) — Elements of Statistical Learning"]
+    },
+
+    {
+      id: "ratio-features",
+      category: "crossing",
+      title: "Ratios & Golden Features",
+      subtitle: "Création manuelle guidée par la connaissance métier",
+      difficulty: 1,
+      tags: ["interprétabilité", "connaissance métier", "ratios", "kaggle winners"],
+      leakage_risk: false,
+      leakage_note: "Pas de risque de fuite : opérations algébriques déterministes sans utilisation de la cible.",
+      principle: "Création manuelle de features composites en appliquant des opérations arithmétiques (+, -, ×, ÷) entre features existantes, guidée par la connaissance du domaine. Ces 'golden features' sont souvent parmi les plus importantes car elles encodent des invariances ou des ratios naturels (taux de conversion, ratio dette/revenu, densité, vitesse...).",
+      when_to_use: [
+        "Connaissance métier forte : les experts du domaine suggèrent des combinaisons physiquement ou économiquement pertinentes.",
+        "Modèles linéaires : un ratio (A/B) est une feature non-linéaire inatteignable sans cette construction.",
+        "Amélioration rapide de baseline : souvent le premier gain en compétition.",
+        "Features avec des unités différentes : normalisation naturelle par un ratio."
+      ],
+      when_not_to_use: [
+        "Sans connaissance du domaine : générer tous les ratios possibles crée du bruit et des instabilités numériques (division par zéro).",
+        "Arbres de décision profonds : peuvent approximer des ratios avec suffisamment de données, mais les features explicites restent utiles."
+      ],
+      formalism: {
+        latex: "r_{ij} = \\frac{x_i}{x_j + \\epsilon}, \\quad d_{ij} = x_i - x_j, \\quad p_{ij} = x_i \\cdot x_j",
+        explanation: "ε est une constante de stabilité numérique (1e-6) pour éviter les divisions par zéro. La sélection des ratios pertinents doit être guidée par le domaine, jamais exhaustive.",
+        variables: [
+          { name: "ε", desc: "Terme de stabilité numérique (1e-6 à 1e-3 selon l'échelle des données)" },
+          { name: "r_ij", desc: "Ratio de la feature i par la feature j" },
+          { name: "d_ij", desc: "Différence : utile pour des features sur la même échelle" }
+        ]
+      },
+      implementation: `<span class="kw">import</span> pandas <span class="kw">as</span> pd
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+
+eps <span class="op">=</span> <span class="nm">1e-6</span>
+
+<span class="cm"># Exemples typiques de golden features par domaine</span>
+<span class="cm"># --- Crédit / Finance ---</span>
+df[<span class="st">'ratio_dette_revenu'</span>]   <span class="op">=</span> df[<span class="st">'dette'</span>] <span class="op">/</span> (df[<span class="st">'revenu'</span>] <span class="op">+</span> eps)
+df[<span class="st">'ratio_epargne_revenu'</span>] <span class="op">=</span> df[<span class="st">'epargne'</span>] <span class="op">/</span> (df[<span class="st">'revenu'</span>] <span class="op">+</span> eps)
+df[<span class="st">'solde_net'</span>]            <span class="op">=</span> df[<span class="st">'credits'</span>] <span class="op">-</span> df[<span class="st">'debits'</span>]
+
+<span class="cm"># --- E-commerce ---</span>
+df[<span class="st">'taux_conversion'</span>]  <span class="op">=</span> df[<span class="st">'achats'</span>] <span class="op">/</span> (df[<span class="st">'visites'</span>] <span class="op">+</span> eps)
+df[<span class="st">'panier_moyen'</span>]     <span class="op">=</span> df[<span class="st">'ca'</span>] <span class="op">/</span> (df[<span class="st">'nb_commandes'</span>] <span class="op">+</span> eps)
+df[<span class="st">'taux_retour'</span>]      <span class="op">=</span> df[<span class="st">'retours'</span>] <span class="op">/</span> (df[<span class="st">'achats'</span>] <span class="op">+</span> eps)
+
+<span class="cm"># --- Immobilier ---</span>
+df[<span class="st">'prix_m2'</span>]          <span class="op">=</span> df[<span class="st">'prix'</span>] <span class="op">/</span> (df[<span class="st">'surface'</span>] <span class="op">+</span> eps)
+df[<span class="st">'ratio_jardin'</span>]     <span class="op">=</span> df[<span class="st">'surf_jardin'</span>] <span class="op">/</span> (df[<span class="st">'surf_total'</span>] <span class="op">+</span> eps)`,
+      code_note: "Toujours vérifier la corrélation entre les features créées et la target. Un ratio non-significatif peut introduire du bruit. Valider avec une importance de permutation.",
+      complexity: { time: "O(n·k)", space: "O(n·k)" },
+      references: ["Kaggle winning solutions", "Domain feature engineering best practices"]
+    },
+
+    // ═══ BINNING ═══
+    {
+      id: "decision-tree-binning",
+      category: "binning",
+      title: "Decision Tree Binning",
+      subtitle: "Discrétisation supervisée par arbre univarié",
+      difficulty: 2,
+      tags: ["supervisé", "seuils optimaux", "crédit scoring", "monotone"],
+      leakage_risk: true,
+      leakage_note: "L'arbre doit être entraîné sur X_train uniquement. Appliquer les seuils ensuite sur X_test.",
+      principle: "Un arbre de décision univarié (une seule feature en entrée) est utilisé pour trouver les seuils de découpage optimaux en minimisant l'impureté (Gini ou MSE) par rapport à la variable cible. Les feuilles de l'arbre définissent les bins. Cette approche produit des intervalles qui maximisent le pouvoir discriminant pour la variable cible.",
+      when_to_use: [
+        "Quand on veut créer des bins statistiquement distincts par rapport à la cible.",
+        "Credit scoring : pour discrétiser des variables continues en modalités interprétables.",
+        "Variables avec relation non-monotone à la cible (ex: relation en U entre âge et risque).",
+        "Comme prétraitement pour convertir des features continues en catégorielles pour du WoE."
+      ],
+      when_not_to_use: [
+        "Petit dataset : l'arbre peut créer des bins trop spécifiques (surapprentissage sur les seuils).",
+        "Sans régularisation de l'arbre (max_depth, min_samples_leaf) : les bins seront trop fins."
+      ],
+      formalism: {
+        latex: "\\text{Seuils} = \\{t^* : t^* = \\arg\\min_t \\left[ n_L \\cdot I(R_L) + n_R \\cdot I(R_R) \\right]\\}",
+        explanation: "I() est la mesure d'impureté (Gini pour classification, MSE pour régression). n_L et n_R sont les effectifs des régions gauche et droite après le split au seuil t. L'arbre cherche récursivement le seuil minimisant l'impureté pondérée.",
+        variables: [
+          { name: "I(R)", desc: "Impureté de la région R (Gini ou MSE)" },
+          { name: "max_depth", desc: "Profondeur max de l'arbre = nombre max de bins - 1" },
+          { name: "min_samples_leaf", desc: "Taille minimale par bin (régularisation cruciale)" }
+        ]
+      },
+      implementation: `<span class="kw">from</span> sklearn.tree <span class="kw">import</span> DecisionTreeClassifier
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+
+<span class="kw">def</span> <span class="fn">tree_binning</span>(X_train, X_test, col, y_train,
+                  max_depth<span class="op">=</span><span class="nm">4</span>, min_samples_leaf<span class="op">=</span><span class="nm">50</span>):
+    <span class="cm"># Arbre univarié sur le train uniquement</span>
+    tree <span class="op">=</span> DecisionTreeClassifier(
+        max_depth<span class="op">=</span>max_depth,
+        min_samples_leaf<span class="op">=</span>min_samples_leaf
+    )
+    tree.fit(X_train[[col]], y_train)
+    
+    <span class="cm"># Extraire les seuils internes de l'arbre</span>
+    thresholds <span class="op">=</span> np.unique(
+        tree.tree_.threshold[tree.tree_.feature <span class="op">!=</span> <span class="op">-</span><span class="nm">2</span>]
+    )
+    thresholds <span class="op">=</span> np.sort(thresholds)
+    
+    <span class="cm"># Mapper chaque valeur à son bin (0, 1, 2, ...)</span>
+    X_train[f<span class="st">'{col}_bin'</span>] <span class="op">=</span> np.digitize(X_train[col], thresholds)
+    X_test[f<span class="st">'{col}_bin'</span>]  <span class="op">=</span> np.digitize(X_test[col], thresholds)
+    
+    print(f<span class="st">"Seuils pour {col} : {thresholds}"</span>)
+    <span class="kw">return</span> X_train, X_test, thresholds
+
+X_train, X_test, seuils <span class="op">=</span> tree_binning(
+    X_train, X_test, <span class="st">'age'</span>, y_train, max_depth<span class="op">=</span><span class="nm">4</span>
+)`,
+      code_note: "min_samples_leaf est le paramètre de régularisation le plus important. Une règle pratique : au moins 5% du dataset d'entraînement par feuille.",
+      complexity: { time: "O(n·log n)", space: "O(profondeur)" },
+      references: ["optbinning library", "Siddiqi (2006) — Credit Risk Scorecard"]
+    },
+
+    {
+      id: "optbinning",
+      category: "binning",
+      title: "OptBinning (Chi-Merge)",
+      subtitle: "Discrétisation optimale par programmation mathématique",
+      difficulty: 3,
+      tags: ["credit scoring", "IV maximisation", "monotone WoE", "optimal"],
+      leakage_risk: true,
+      leakage_note: "OptBinning utilise la target : fit sur train uniquement, transform sur test.",
+      principle: "Chi-Merge fusionne itérativement des intervalles adjacents dont les distributions de la cible ne sont pas statistiquement différentes (test du χ²). La library OptBinning étend ce principe avec de la programmation mathématique pour maximiser directement l'Information Value sous contraintes de monotonicité et de taille minimale de bin.",
+      when_to_use: [
+        "Credit scoring réglementaire où la monotonicité WoE est souvent exigée.",
+        "Quand le nombre de bins optimal n'est pas connu a priori.",
+        "Discrétisation de variables continues pour modèle logistique avec WoE.",
+        "Analyse de relation variable-cible : les bins optimaux révèlent le pattern sous-jacent."
+      ],
+      when_not_to_use: [
+        "Features pour des modèles ensemblistes non-linéaires : over-engineering.",
+        "Variables déjà catégorielles à faible cardinalité."
+      ],
+      formalism: {
+        latex: "\\chi^2_k = \\sum_{c=0}^{1} \\frac{(O_{k,c} - E_{k,c})^2}{E_{k,c}}, \\quad E_{k,c} = \\frac{n_k \\cdot n_c}{N}",
+        explanation: "On fusionne les deux intervalles adjacents avec le χ² le plus faible (différence la moins significative). Le processus s'arrête quand tous les χ² dépassent un seuil critique.",
+        variables: [
+          { name: "O_{k,c}", desc: "Effectif observé dans l'intervalle k pour la classe c" },
+          { name: "E_{k,c}", desc: "Effectif attendu sous H0 (indépendance)" },
+          { name: "χ² critique", desc: "Seuil au-delà duquel on arrête de fusionner (ex: 3.84 pour α=0.05)" }
+        ]
+      },
+      implementation: `<span class="kw">from</span> optbinning <span class="kw">import</span> OptimalBinning
+<span class="kw">import</span> pandas <span class="kw">as</span> pd
+
+<span class="cm"># Binning optimal avec contrainte de monotonicité WoE</span>
+optb <span class="op">=</span> OptimalBinning(
+    name<span class="op">=</span><span class="st">'age'</span>,
+    dtype<span class="op">=</span><span class="st">"numerical"</span>,
+    solver<span class="op">=</span><span class="st">"cp"</span>,
+    monotonic_trend<span class="op">=</span><span class="st">"auto"</span>,   <span class="cm"># monotonicité WoE auto-détectée</span>
+    min_bin_size<span class="op">=</span><span class="nm">0.05</span>            <span class="cm"># min 5% par bin</span>
+)
+optb.fit(X_train[<span class="st">'age'</span>].values, y_train.values)
+
+<span class="cm"># Table de binning avec WoE et IV par bin</span>
+print(optb.binning_table.build())
+
+<span class="cm"># Encoder</span>
+X_train[<span class="st">'age_woe'</span>] <span class="op">=</span> optb.transform(X_train[<span class="st">'age'</span>].values, metric<span class="op">=</span><span class="st">'woe'</span>)
+X_test[<span class="st">'age_woe'</span>]  <span class="op">=</span> optb.transform(X_test[<span class="st">'age'</span>].values, metric<span class="op">=</span><span class="st">'woe'</span>)
+
+<span class="cm"># Afficher l'IV total de la variable</span>
+print(f<span class="st">"IV(age) = {optb.binning_table.iv:.4f}"</span>)`,
+      code_note: "monotonic_trend='auto' laisse OptBinning détecter si la relation WoE est croissante, décroissante, ou non-monotone. Pour le scoring réglementaire, forcer 'ascending' ou 'descending'.",
+      complexity: { time: "O(n·log n + B²)", space: "O(B)" },
+      references: ["Mironchyk & Tchistiakov (2017)", "optbinning Python library"]
+    },
+
+    // ═══ SELECTION ═══
+    {
+      id: "shap-selection",
+      category: "selection",
+      title: "SHAP Feature Importance",
+      subtitle: "Valeurs de Shapley pour sélection robuste",
+      difficulty: 3,
+      tags: ["interprétabilité", "tout modèle", "robust", "gold standard"],
+      leakage_risk: false,
+      leakage_note: "Les valeurs SHAP sont calculées a posteriori sur le modèle entraîné. Aucun risque de fuite.",
+      principle: "Les valeurs SHAP (SHapley Additive exPlanations) mesurent la contribution marginale de chaque feature à chaque prédiction individuelle, en moyennant sur toutes les coalitions possibles de features. Contrairement à l'importance par permutation, SHAP est robuste aux corrélations entre features. TreeSHAP (pour les arbres) calcule les valeurs exactes en O(T·L·D²).",
+      when_to_use: [
+        "Sélection de features finale après entraînement d'un modèle (post-hoc).",
+        "Identification des features redondantes : deux features fortement corrélées auront des SHAP qui se partagent l'importance.",
+        "Diagnostic de data leakage : une feature avec SHAP anormalement élevé peut révéler une fuite.",
+        "Features importantes qui varient selon les segments de données (SHAP interaction plots)."
+      ],
+      when_not_to_use: [
+        "SHAP Kernel (modèles non-arborescents) est très lent sur grand volume : privilégier TreeSHAP.",
+        "Pas adapté pour sélectionner les features avant entraînement : nécessite un modèle déjà entraîné."
+      ],
+      formalism: {
+        latex: "\\phi_j = \\sum_{S \\subseteq F \\setminus \\{j\\}} \\frac{|S|!(|F|-|S|-1)!}{|F|!} \\left[ v(S \\cup \\{j\\}) - v(S) \\right]",
+        explanation: "φ_j est la valeur SHAP de la feature j. Elle somme les contributions marginales de j pour toutes les coalitions S de features. La propriété d'efficacité garantit que la somme des SHAP égale exactement la prédiction moins la prédiction moyenne.",
+        variables: [
+          { name: "F", desc: "Ensemble de toutes les features" },
+          { name: "S", desc: "Coalition de features (sous-ensemble de F sans j)" },
+          { name: "v(S)", desc: "Valeur (prédiction) du modèle avec seulement les features de S" }
+        ]
+      },
+      implementation: `<span class="kw">import</span> shap
+<span class="kw">import</span> xgboost <span class="kw">as</span> xgb
+<span class="kw">import</span> pandas <span class="kw">as</span> pd
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+
+model <span class="op">=</span> xgb.XGBClassifier(n_estimators<span class="op">=</span><span class="nm">200</span>, random_state<span class="op">=</span><span class="nm">42</span>)
+model.fit(X_train, y_train)
+
+<span class="cm"># Calculer les valeurs SHAP (TreeSHAP : rapide et exact)</span>
+explainer <span class="op">=</span> shap.TreeExplainer(model)
+shap_values <span class="op">=</span> explainer.shap_values(X_train)
+
+<span class="cm"># Importance globale : mean(|SHAP|) par feature</span>
+shap_importance <span class="op">=</span> pd.DataFrame({
+    <span class="st">'feature'</span>: X_train.columns,
+    <span class="st">'importance'</span>: np.abs(shap_values).mean(axis<span class="op">=</span><span class="nm">0</span>)
+}).sort_values(<span class="st">'importance'</span>, ascending<span class="op">=</span><span class="kw">False</span>)
+
+<span class="cm"># Sélection : garder les features avec SHAP moyen > seuil</span>
+threshold <span class="op">=</span> shap_importance[<span class="st">'importance'</span>].quantile(<span class="nm">0.25</span>)
+selected_features <span class="op">=</span> shap_importance[shap_importance[<span class="st">'importance'</span>] <span class="op">&gt;</span> threshold][<span class="st">'feature'</span>].tolist()
+
+<span class="cm"># Visualisation</span>
+shap.summary_plot(shap_values, X_train, plot_type<span class="op">=</span><span class="st">"bar"</span>)`,
+      code_note: "shap.summary_plot() offre une vue riche : violin plot montrant la distribution des SHAP par feature et leur direction (rouge = valeur haute de la feature augmente la prédiction).",
+      complexity: { time: "O(T·L·D²) TreeSHAP", space: "O(n·p)" },
+      references: ["Lundberg & Lee (2017) — NIPS", "Lundberg et al. (2020) — Nature Machine Intelligence"]
+    },
+
+    {
+      id: "boruta",
+      category: "selection",
+      title: "Boruta",
+      subtitle: "Sélection par comparaison à des variables fantômes",
+      difficulty: 2,
+      tags: ["forêts aléatoires", "élimination bruit", "tout ou rien", "rigoureux"],
+      leakage_risk: false,
+      leakage_note: "Boruta n'utilise que X et y via un modèle. Pas de fuite si le modèle est correctement entraîné.",
+      principle: "Boruta crée des copies aléatoires de toutes les features (shadow features) en permutant leurs valeurs. Un Random Forest est entraîné sur l'ensemble original + shadow. Une feature réelle est conservée si son importance est statistiquement supérieure à celle de la meilleure shadow feature (test binomial). C'est une méthode 'tout ou rien' : chaque feature est déclarée confirmée, rejetée, ou tentative.",
+      when_to_use: [
+        "Quand on veut une liste définitive de features avec justification statistique.",
+        "Datasets avec beaucoup de features bruitées ou redondantes.",
+        "Validation d'une sélection de features avant mise en production.",
+        "Boruta-SHAP : version plus robuste utilisant les valeurs SHAP comme mesure d'importance."
+      ],
+      when_not_to_use: [
+        "Très grand nombre de features (> 1000) et/ou grand dataset : coût computationnel élevé (O(n·p·T) par itération).",
+        "Deadline serrée : Boruta peut nécessiter 100+ itérations. Préférer la permutation importance en urgence."
+      ],
+      formalism: {
+        latex: "H_0: \\text{importance}(X_j) \\leq \\text{max}(\\text{importance}(\\text{shadow})), \\quad p_{\\text{corr}} = \\text{Bonferroni}(p_j, p)",
+        explanation: "Le test de Wald (ou binomial) est appliqué à chaque feature. La correction de Bonferroni est utilisée pour contrôler le Family-Wise Error Rate (FWER). Les shadow features sont recréées à chaque itération pour éviter la convergence prématurée.",
+        variables: [
+          { name: "shadow features", desc: "Copies permutées de chaque feature : importance nulle par construction" },
+          { name: "FWER", desc: "Family-Wise Error Rate : probabilité de rejeter au moins une feature à tort" }
+        ]
+      },
+      implementation: `<span class="kw">from</span> boruta <span class="kw">import</span> BorutaPy
+<span class="kw">from</span> sklearn.ensemble <span class="kw">import</span> RandomForestClassifier
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+
+<span class="cm"># Modèle de base pour Boruta</span>
+rf <span class="op">=</span> RandomForestClassifier(
+    n_estimators<span class="op">=</span><span class="nm">100</span>, max_depth<span class="op">=</span><span class="nm">7</span>,
+    n_jobs<span class="op">=</span><span class="op">-</span><span class="nm">1</span>, random_state<span class="op">=</span><span class="nm">42</span>
+)
+
+boruta <span class="op">=</span> BorutaPy(
+    estimator<span class="op">=</span>rf,
+    n_estimators<span class="op">=</span><span class="st">'auto'</span>,
+    alpha<span class="op">=</span><span class="nm">0.05</span>,         <span class="cm"># seuil de significativité</span>
+    max_iter<span class="op">=</span><span class="nm">100</span>,       <span class="cm"># max 100 itérations</span>
+    random_state<span class="op">=</span><span class="nm">42</span>,
+    verbose<span class="op">=</span><span class="nm">1</span>
+)
+boruta.fit(X_train.values, y_train.values)
+
+<span class="cm"># Features sélectionnées</span>
+selected  <span class="op">=</span> X_train.columns[boruta.support_].tolist()
+tentative <span class="op">=</span> X_train.columns[boruta.support_weak_].tolist()
+
+print(f<span class="st">"Confirmées  : {len(selected)}"</span>)
+print(f<span class="st">"Tentatives  : {len(tentative)}"</span>)
+print(f<span class="st">"Rejetées    : {X_train.shape[1] - len(selected) - len(tentative)}"</span>)
+
+X_train_sel <span class="op">=</span> X_train[selected]`,
+      code_note: "Les features 'tentatives' (support_weak_) sont statistiquement ambiguës. On peut les inclure provisoirement et évaluer leur impact sur un holdout.",
+      complexity: { time: "O(n·p·T·max_iter)", space: "O(n·2p)" },
+      references: ["Kursa & Rudnicki (2010) — Journal of Statistical Software", "BorutaSHAP library"]
+    },
+
+    {
+      id: "vif",
+      category: "selection",
+      title: "Variance Inflation Factor (VIF)",
+      subtitle: "Détection et traitement de la multicolinéarité",
+      difficulty: 2,
+      tags: ["régression linéaire", "multicolinéarité", "stabilité", "interprétabilité"],
+      leakage_risk: false,
+      leakage_note: "VIF est calculé sur X uniquement, sans la variable cible. Aucun risque de fuite.",
+      principle: "Le VIF mesure à quel point chaque feature peut être prédite par les autres features (R² de la régression de Xi sur toutes les autres features). Un VIF élevé indique une forte colinéarité, qui peut rendre les coefficients d'une régression instables et difficiles à interpréter. Règle empirique : VIF > 10 → problème sérieux, VIF > 5 → à surveiller.",
+      when_to_use: [
+        "Modèles linéaires (régression logistique, linéaire) où les coefficients doivent être interprétables.",
+        "Avant un PCA pour justifier la réduction dimensionnelle (colinéarité → variance redondante).",
+        "Diagnostic post-entraînement si les coefficients changent drastiquement selon le dataset.",
+        "Scoring réglementaire : les auditeurs exigent l'absence de multicolinéarité forte."
+      ],
+      when_not_to_use: [
+        "Modèles à base d'arbres : la multicolinéarité ne pose pas de problème statistique (mais peut biaiser l'importance).",
+        "Données avec p >> n : VIF est instable avec trop de features par rapport aux observations."
+      ],
+      formalism: {
+        latex: "\\text{VIF}_j = \\frac{1}{1 - R_j^2}, \\quad R_j^2 = \\text{coeff. déterm. de } X_j \\sim \\sum_{k \\neq j} X_k",
+        explanation: "R²_j est le R² obtenu en régressant la feature j sur toutes les autres features. VIF_j = 1 signifie aucune colinéarité. VIF_j = ∞ signifie colinéarité parfaite (feature identique à une combinaison linéaire des autres).",
+        variables: [
+          { name: "R²_j", desc: "Coefficient de détermination de X_j régressé sur toutes les autres features" },
+          { name: "VIF > 10", desc: "Seuil classique de problème de multicolinéarité" }
+        ]
+      },
+      implementation: `<span class="kw">from</span> statsmodels.stats.outliers_influence <span class="kw">import</span> variance_inflation_factor
+<span class="kw">import</span> pandas <span class="kw">as</span> pd
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+
+<span class="kw">def</span> <span class="fn">compute_vif</span>(X):
+    vif_data <span class="op">=</span> pd.DataFrame()
+    vif_data[<span class="st">"feature"</span>] <span class="op">=</span> X.columns
+    vif_data[<span class="st">"VIF"</span>] <span class="op">=</span> [
+        variance_inflation_factor(X.values, i)
+        <span class="kw">for</span> i <span class="kw">in</span> range(X.shape[<span class="nm">1</span>])
+    ]
+    <span class="kw">return</span> vif_data.sort_values(<span class="st">"VIF"</span>, ascending<span class="op">=</span><span class="kw">False</span>)
+
+<span class="cm"># Suppression itérative des features à VIF > 10</span>
+<span class="kw">def</span> <span class="fn">drop_high_vif</span>(X, threshold<span class="op">=</span><span class="nm">10</span>):
+    <span class="kw">while</span> <span class="kw">True</span>:
+        vif <span class="op">=</span> compute_vif(X)
+        max_vif <span class="op">=</span> vif[<span class="st">'VIF'</span>].max()
+        <span class="kw">if</span> max_vif <span class="op">&lt;</span> threshold:
+            <span class="kw">break</span>
+        worst_feature <span class="op">=</span> vif.loc[vif[<span class="st">'VIF'</span>].idxmax(), <span class="st">'feature'</span>]
+        print(f<span class="st">"Suppression : {worst_feature} (VIF={max_vif:.1f})"</span>)
+        X <span class="op">=</span> X.drop(columns<span class="op">=</span>[worst_feature])
+    <span class="kw">return</span> X
+
+X_no_collinear <span class="op">=</span> drop_high_vif(X_train)`,
+      code_note: "L'algorithme de suppression itérative est glouton et dépend de l'ordre. Alternativement, utiliser la Ridge Regression ou l'Elastic Net qui gèrent naturellement la multicolinéarité.",
+      complexity: { time: "O(p²·n)", space: "O(p²)" },
+      references: ["O'Brien (2007) — Quality & Quantity", "statsmodels.stats.outliers_influence"]
+    },
+
+    // ═══ REDUCTION ═══
+    {
+      id: "pca-features",
+      category: "reduction",
+      title: "PCA — Composantes comme features",
+      subtitle: "Extraction de variance dans un espace orthogonal",
+      difficulty: 2,
+      tags: ["dimensionnalité", "corrélation", "compression", "bruit"],
+      leakage_risk: true,
+      leakage_note: "PCA.fit() sur X_train uniquement. Appliquer .transform() sur X_test sans re-fitter.",
+      principle: "L'Analyse en Composantes Principales (ACP) identifie les directions de variance maximale dans les données (vecteurs propres de la matrice de covariance). Les projections sur ces axes (composantes principales) sont décorrélées et ordonnées par variance décroissante. En ne conservant que les k premières, on réduit la dimension tout en préservant un maximum de variance.",
+      when_to_use: [
+        "Features très corrélées entre elles : la PCA factorise la variance commune.",
+        "Réduction du bruit : les dernières composantes captent principalement le bruit.",
+        "Visualisation en 2D/3D pour explorer la structure des données.",
+        "Avant un modèle linéaire ou SVM sensible à la malédiction de la dimensionnalité."
+      ],
+      when_not_to_use: [
+        "Données catégorielles : PCA n'est définie que pour des données numériques.",
+        "Quand l'interprétabilité des features est requise : les composantes sont des combinaisons linéaires difficiles à interpréter.",
+        "Arbres de décision : la PCA ne bénéficie pas aux modèles basés sur les splits."
+      ],
+      formalism: {
+        latex: "\\mathbf{Z} = \\mathbf{X} \\mathbf{W}, \\quad \\mathbf{W} = [\\mathbf{v}_1, \\ldots, \\mathbf{v}_k], \\quad \\text{var}(Z_i) = \\lambda_i \\geq \\lambda_{i+1}",
+        explanation: "W est la matrice des k vecteurs propres principaux de la matrice de covariance. Les valeurs propres λ_i représentent la variance expliquée par chaque composante. On conserve k composantes telles que Σλ_i / Σλ_total ≥ 0.95 (règle des 95% de variance expliquée).",
+        variables: [
+          { name: "v_i", desc: "i-ème vecteur propre (loading) de la matrice de covariance" },
+          { name: "λ_i", desc: "i-ème valeur propre = variance de la i-ème composante" },
+          { name: "k", desc: "Nombre de composantes conservées" }
+        ]
+      },
+      implementation: `<span class="kw">from</span> sklearn.decomposition <span class="kw">import</span> PCA
+<span class="kw">from</span> sklearn.preprocessing <span class="kw">import</span> StandardScaler
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+
+<span class="cm"># Étape 1 : standardiser (obligatoire avant PCA)</span>
+scaler <span class="op">=</span> StandardScaler()
+X_train_sc <span class="op">=</span> scaler.fit_transform(X_train)
+X_test_sc  <span class="op">=</span> scaler.transform(X_test)
+
+<span class="cm"># Étape 2 : PCA — conserver 95% de la variance</span>
+pca <span class="op">=</span> PCA(n_components<span class="op">=</span><span class="nm">0.95</span>, random_state<span class="op">=</span><span class="nm">42</span>)
+pca.fit(X_train_sc)
+
+X_train_pca <span class="op">=</span> pca.transform(X_train_sc)
+X_test_pca  <span class="op">=</span> pca.transform(X_test_sc)
+
+print(f<span class="st">"Dimension originale : {X_train.shape[1]}"</span>)
+print(f<span class="st">"Après PCA (95%) : {X_train_pca.shape[1]}"</span>)
+print(f<span class="st">"Variance expliquée cumulée : {pca.explained_variance_ratio_.cumsum()[-1]:.3f}"</span>)
+
+<span class="cm"># Stratégie hybride : PCA + features originales</span>
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+X_train_enriched <span class="op">=</span> np.hstack([X_train_sc, X_train_pca])`,
+      code_note: "La stratégie hybride (features originales + composantes PCA) est souvent plus puissante que PCA seul. Les composantes ajoutent de l'information orthogonale.",
+      complexity: { time: "O(n·p·min(n,p))", space: "O(p²)" },
+      references: ["Hotelling (1933)", "sklearn.decomposition.PCA", "Jolliffe (2002) — Principal Component Analysis"]
+    },
+
+    {
+      id: "pca-residuals",
+      category: "reduction",
+      title: "PCA Résidus — Feature d'anomalie",
+      subtitle: "Erreur de reconstruction comme signal d'outlier",
+      difficulty: 3,
+      tags: ["détection anomalies", "outliers", "signal déviation", "unsupervised"],
+      leakage_risk: true,
+      leakage_note: "La PCA doit être fittée sur X_train uniquement, puis appliquée à X_test pour calculer les résidus de test.",
+      principle: "Après une PCA, l'erreur de reconstruction (norme de la différence entre l'observation originale et sa reconstruction dans l'espace PCA) mesure à quel point l'observation est typique de la distribution d'entraînement. Une erreur élevée signale une observation atypique (outlier potentiel, anomalie, ou fraude). Cette feature est particulièrement puissante en contexte non-supervisé.",
+      when_to_use: [
+        "Détection d'anomalies ou de fraude comme feature supplémentaire dans un modèle supervisé.",
+        "Identification d'observations de test très différentes du train (covariate shift).",
+        "Signal de nouveauté dans des systèmes en production.",
+        "Combiné avec un Isolation Forest ou un One-Class SVM."
+      ],
+      when_not_to_use: [
+        "Données avec une très grande variabilité naturelle : l'erreur de reconstruction sera uniformément élevée.",
+        "Si les anomalies se trouvent dans le sous-espace principal (et non dans les composantes résiduelles)."
+      ],
+      formalism: {
+        latex: "\\epsilon_i = \\| \\mathbf{x}_i - \\hat{\\mathbf{x}}_i \\|_2, \\quad \\hat{\\mathbf{x}}_i = \\mathbf{W} \\mathbf{W}^\\top \\mathbf{x}_i",
+        explanation: "L'erreur ε_i mesure la distance entre l'observation originale et sa projection dans l'espace de dimension réduite. Une PCA conservant peu de composantes (variance faible) donnera des résidus plus discriminants pour les anomalies.",
+        variables: [
+          { name: "x̂_i", desc: "Reconstruction de x_i dans l'espace de dimension k" },
+          { name: "ε_i", desc: "Erreur de reconstruction (feature d'anomalie)" },
+          { name: "W", desc: "Matrice des k vecteurs propres principaux (k << p)" }
+        ]
+      },
+      implementation: `<span class="kw">from</span> sklearn.decomposition <span class="kw">import</span> PCA
+<span class="kw">from</span> sklearn.preprocessing <span class="kw">import</span> StandardScaler
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+
+<span class="cm"># PCA avec peu de composantes pour maximiser les résidus</span>
+scaler <span class="op">=</span> StandardScaler()
+X_train_sc <span class="op">=</span> scaler.fit_transform(X_train)
+X_test_sc  <span class="op">=</span> scaler.transform(X_test)
+
+pca <span class="op">=</span> PCA(n_components<span class="op">=</span><span class="nm">0.70</span>)  <span class="cm"># conserver 70% → résidus plus informatifs</span>
+pca.fit(X_train_sc)
+
+<span class="kw">def</span> <span class="fn">reconstruction_error</span>(X, pca, scaler):
+    X_sc <span class="op">=</span> scaler.transform(X) <span class="kw">if</span> scaler <span class="kw">else</span> X
+    X_pca <span class="op">=</span> pca.transform(X_sc)
+    X_rec <span class="op">=</span> pca.inverse_transform(X_pca)
+    <span class="kw">return</span> np.linalg.norm(X_sc <span class="op">-</span> X_rec, axis<span class="op">=</span><span class="nm">1</span>)
+
+X_train[<span class="st">'pca_residual'</span>] <span class="op">=</span> reconstruction_error(X_train, pca, scaler)
+X_test[<span class="st">'pca_residual'</span>]  <span class="op">=</span> reconstruction_error(X_test, pca, scaler)
+
+<span class="cm"># Percentile du résidu sur le train → feature relative</span>
+from scipy <span class="kw">import</span> stats
+X_train[<span class="st">'pca_residual_pct'</span>] <span class="op">=</span> stats.rankdata(X_train[<span class="st">'pca_residual'</span>]) <span class="op">/</span> len(X_train)`,
+      code_note: "Plus k (le nombre de composantes) est faible, plus les résidus sont sensibles aux anomalies. Expérimenter avec différents niveaux de variance expliquée (50%, 70%, 90%).",
+      complexity: { time: "O(n·p·k)", space: "O(n·p)" },
+      references: ["Shyu et al. (2003) — A Novel Anomaly Detection Scheme", "sklearn.decomposition.PCA"]
+    },
+
+    // ═══ TEMPORAL ═══
+    {
+      id: "fourier-features",
+      category: "temporal",
+      title: "Fourier Terms",
+      subtitle: "Encodage cyclique des saisonnalités",
+      difficulty: 2,
+      tags: ["séries temporelles", "saisonnalité", "périodicité", "modèles linéaires"],
+      leakage_risk: false,
+      leakage_note: "Les termes de Fourier sont calculés à partir de l'index temporel uniquement, sans la cible.",
+      principle: "Les saisonnalités périodiques (hebdomadaires, annuelles, journalières) sont encodées par des paires sinus/cosinus avec des fréquences harmoniques. Contrairement à un encodage ordinal (lundi=0, ..., dimanche=6), l'encodage circulaire garantit que dimanche et lundi sont 'proches' dans l'espace des features. L'utilisation de K harmoniques capture des patterns de plus en plus complexes à l'intérieur de la période.",
+      when_to_use: [
+        "Séries temporelles avec saisonnalité connue (journalière, hebdomadaire, annuelle).",
+        "Modèles linéaires ou à base d'arbres devant capturer des effets cycliques.",
+        "Encodage de variables cycliques en général : heure du jour, mois de l'année, angle.",
+        "Modèles de prévision de séries temporelles sans architecture récurrente."
+      ],
+      when_not_to_use: [
+        "Saisonnalités inconnues ou multiples non-identifiées : utiliser une STL decomposition d'abord.",
+        "Si la période varie dans le temps (non-stationnaire) : les Fourier terms à période fixe seront faux."
+      ],
+      formalism: {
+        latex: "s_k(t) = \\sin\\!\\left(\\frac{2\\pi k t}{P}\\right), \\quad c_k(t) = \\cos\\!\\left(\\frac{2\\pi k t}{P}\\right), \\quad k = 1, 2, \\ldots, K",
+        explanation: "P est la période (ex: 7 pour une saisonnalité hebdomadaire en données journalières, 52 pour annuelle en données hebdomadaires). K est le nombre d'harmoniques : K=1 pour une sinusoïde simple, K plus grand pour des patterns plus complexes.",
+        variables: [
+          { name: "P", desc: "Période en unités temporelles (7=semaine, 365.25=année, 24=journée)" },
+          { name: "k", desc: "Indice harmonique (1=fréquence fondamentale, 2=2ème harmonique...)" },
+          { name: "K", desc: "Nombre d'harmoniques (augmente la complexité du pattern capturé)" }
+        ]
+      },
+      implementation: `<span class="kw">import</span> numpy <span class="kw">as</span> np
+<span class="kw">import</span> pandas <span class="kw">as</span> pd
+
+<span class="kw">def</span> <span class="fn">add_fourier_features</span>(df, time_col, period, n_harmonics<span class="op">=</span><span class="nm">3</span>, prefix<span class="op">=</span><span class="st">''</span>):
+    <span class="st">"""Ajoute K paires sin/cos pour une période donnée."""</span>
+    t <span class="op">=</span> df[time_col].values
+    <span class="kw">for</span> k <span class="kw">in</span> range(<span class="nm">1</span>, n_harmonics <span class="op">+</span> <span class="nm">1</span>):
+        df[f<span class="st">'{prefix}sin_{k}'</span>] <span class="op">=</span> np.sin(<span class="nm">2</span> <span class="op">*</span> np.pi <span class="op">*</span> k <span class="op">*</span> t <span class="op">/</span> period)
+        df[f<span class="st">'{prefix}cos_{k}'</span>] <span class="op">=</span> np.cos(<span class="nm">2</span> <span class="op">*</span> np.pi <span class="op">*</span> k <span class="op">*</span> t <span class="op">/</span> period)
+    <span class="kw">return</span> df
+
+<span class="cm"># Saisonnalité hebdomadaire (données journalières)</span>
+df[<span class="st">'dayofweek'</span>] <span class="op">=</span> df[<span class="st">'date'</span>].dt.dayofweek
+df <span class="op">=</span> add_fourier_features(df, <span class="st">'dayofweek'</span>, period<span class="op">=</span><span class="nm">7</span>, n_harmonics<span class="op">=</span><span class="nm">3</span>, prefix<span class="op">=</span><span class="st">'week_'</span>)
+
+<span class="cm"># Saisonnalité annuelle (données journalières)</span>
+df[<span class="st">'dayofyear'</span>] <span class="op">=</span> df[<span class="st">'date'</span>].dt.dayofyear
+df <span class="op">=</span> add_fourier_features(df, <span class="st">'dayofyear'</span>, period<span class="op">=</span><span class="nm">365.25</span>, n_harmonics<span class="op">=</span><span class="nm">5</span>, prefix<span class="op">=</span><span class="st">'year_'</span>)
+
+<span class="cm"># Encodage circulaire de l'heure du jour</span>
+df[<span class="st">'hour'</span>] <span class="op">=</span> df[<span class="st">'datetime'</span>].dt.hour
+df <span class="op">=</span> add_fourier_features(df, <span class="st">'hour'</span>, period<span class="op">=</span><span class="nm">24</span>, n_harmonics<span class="op">=</span><span class="nm">2</span>, prefix<span class="op">=</span><span class="st">'hour_'</span>)`,
+      code_note: "Choisir K par validation croisée ou via AIC/BIC. Pour la prévision de séries longues, la library Prophet (Meta) génère automatiquement des Fourier terms pour les saisonnalités.",
+      complexity: { time: "O(n·K)", space: "O(n·K)" },
+      references: ["Harvey (1989) — Forecasting, Structural Time Series Models", "Prophet library — Meta AI"]
+    },
+
+    {
+      id: "lag-pacf",
+      category: "temporal",
+      title: "Lag Features & PACF",
+      subtitle: "Valeurs passées sélectionnées par auto-corrélation partielle",
+      difficulty: 2,
+      tags: ["prévision", "autorégressif", "PACF", "séries temporelles"],
+      leakage_risk: true,
+      leakage_note: "Les lags doivent être créés correctement pour éviter la fuite : lag=k signifie que la valeur de t-k est connue au moment de prédire t.",
+      principle: "Les lags (valeurs passées) de la série temporelle constituent les features les plus directes pour la prévision. La Partial Autocorrelation Function (PACF) permet d'identifier quels lags sont vraiment informatifs, en isolant la corrélation directe de y_t avec y_{t-k} après avoir contrôlé les lags intermédiaires. Les lags significatifs (sortant de l'intervalle de confiance 95%) sont les seuls à inclure.",
+      when_to_use: [
+        "Séries temporelles stationnaires avec structure autoregressive.",
+        "Prévision à court terme (horizon < P) où les valeurs récentes sont les plus prédictives.",
+        "Modèles de machine learning traitant la prévision comme une régression supervisée.",
+        "Pour déterminer l'ordre p d'un modèle AR(p)."
+      ],
+      when_not_to_use: [
+        "Séries non-stationnaires sans différenciation préalable : les lags seront biaisés.",
+        "Horizon de prévision > max_lag : pas de lags disponibles dans ce cas (on ne peut pas utiliser y_{t-1} pour prédire y_{t+10} si max_lag=5)."
+      ],
+      formalism: {
+        latex: "PACF(k) = \\text{corr}(y_t - \\hat{y}_t^{(k)}, y_{t-k} - \\hat{y}_{t-k}^{(k)})",
+        explanation: "PACF(k) est la corrélation entre y_t et y_{t-k} après avoir retiré l'influence des lags 1 à k-1. Les lags dépassant ±1.96/√n (IC à 95%) sont statistiquement significatifs.",
+        variables: [
+          { name: "y_{t-k}", desc: "Valeur de la série au temps t-k (lag k)" },
+          { name: "ŷ_t^(k)", desc: "Projection de y_t sur {y_{t-1}, ..., y_{t-k+1}}" },
+          { name: "IC à 95%", desc: "±1.96/√n : seuil de significativité de la PACF" }
+        ]
+      },
+      implementation: `<span class="kw">import</span> pandas <span class="kw">as</span> pd
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+<span class="kw">from</span> statsmodels.graphics.tsaplots <span class="kw">import</span> plot_pacf
+<span class="kw">from</span> statsmodels.tsa.stattools <span class="kw">import</span> pacf
+
+<span class="cm"># 1. Vérifier la stationnarité d'abord (ADF test)</span>
+<span class="kw">from</span> statsmodels.tsa.stattools <span class="kw">import</span> adfuller
+adf_result <span class="op">=</span> adfuller(df[<span class="st">'y'</span>].dropna())
+print(f<span class="st">"ADF p-value: {adf_result[1]:.4f}"</span>)  <span class="cm"># p < 0.05 → stationnaire</span>
+
+<span class="cm"># 2. Calculer PACF et identifier les lags significatifs</span>
+pacf_vals, confint <span class="op">=</span> pacf(df[<span class="st">'y'</span>].dropna(), nlags<span class="op">=</span><span class="nm">30</span>, alpha<span class="op">=</span><span class="nm">0.05</span>)
+significant_lags <span class="op">=</span> [
+    k <span class="kw">for</span> k <span class="kw">in</span> range(<span class="nm">1</span>, len(pacf_vals))
+    <span class="kw">if</span> abs(pacf_vals[k]) <span class="op">&gt;</span> <span class="nm">1.96</span> <span class="op">/</span> np.sqrt(len(df))
+]
+print(f<span class="st">"Lags significatifs : {significant_lags}"</span>)
+
+<span class="cm"># 3. Créer uniquement les lags significatifs</span>
+<span class="kw">for</span> lag <span class="kw">in</span> significant_lags:
+    df[f<span class="st">'lag_{lag}'</span>] <span class="op">=</span> df[<span class="st">'y'</span>].shift(lag)
+
+<span class="cm"># 4. Supprimer les premières lignes avec NaN (= max_lag premières obs.)</span>
+df <span class="op">=</span> df.dropna(subset<span class="op">=</span>[f<span class="st">'lag_{max(significant_lags)}'</span>])`,
+      code_note: "Ne jamais créer les lags sur toute la série avant le split train/test. Le split doit respecter l'ordre chronologique (TimeSeriesSplit).",
+      complexity: { time: "O(n·max_lag)", space: "O(n·max_lag)" },
+      references: ["Box & Jenkins (1976) — Time Series Analysis", "statsmodels.tsa.stattools.pacf"]
+    },
+
+    {
+      id: "rolling-ewm",
+      category: "temporal",
+      title: "Rolling Windows & EWM",
+      subtitle: "Statistiques mobiles et pondération exponentielle",
+      difficulty: 1,
+      tags: ["momentum", "tendance", "feature temporelle", "lissage"],
+      leakage_risk: true,
+      leakage_note: "Toujours utiliser .shift(1) avant .rolling() pour éviter la fuite du point courant dans le calcul de la fenêtre.",
+      principle: "Les statistiques de fenêtre glissante (rolling statistics) capturent le comportement local de la série sur les w dernières observations. L'Exponential Weighted Mean (EWM) donne plus de poids aux observations récentes via un facteur de décroissance exponentielle α. Combinées, ces features encodent la tendance récente, le niveau moyen et la volatilité à différentes échelles temporelles.",
+      when_to_use: [
+        "Capture du momentum et de la tendance à court, moyen et long terme.",
+        "Détection de changements de comportement (ruptures de tendance).",
+        "Features pour la prévision de séries financières, de ventes, d'usage.",
+        "Rolling std comme proxy de volatilité locale."
+      ],
+      when_not_to_use: [
+        "Fenêtres très larges sur petites séries : trop de NaN en début de série.",
+        "Sans shift(1) : data leakage garanti (point courant inclus dans sa propre fenêtre)."
+      ],
+      formalism: {
+        latex: "\\bar{x}_t^{(w)} = \\frac{1}{w}\\sum_{k=1}^{w} x_{t-k}, \\quad \\text{EWM}_t = \\alpha x_{t-1} + (1-\\alpha)\\text{EWM}_{t-1}",
+        explanation: "La fenêtre glissante donne le même poids à toutes les w observations passées. L'EWM donne un poids décroissant exponentiellement : α élevé → très réactif aux changements récents, α faible → lissage fort.",
+        variables: [
+          { name: "w", desc: "Taille de la fenêtre glissante (en périodes)" },
+          { name: "α", desc: "Facteur de lissage EWM ∈ (0,1) — ou span = 2/α - 1" }
+        ]
+      },
+      implementation: `<span class="kw">import</span> pandas <span class="kw">as</span> pd
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+
+<span class="cm"># ✅ Shift(1) OBLIGATOIRE pour éviter le data leakage</span>
+y_shifted <span class="op">=</span> df[<span class="st">'y'</span>].shift(<span class="nm">1</span>)
+
+<span class="cm"># Rolling à plusieurs échelles temporelles</span>
+<span class="kw">for</span> w <span class="kw">in</span> [<span class="nm">7</span>, <span class="nm">14</span>, <span class="nm">28</span>, <span class="nm">90</span>]:
+    df[f<span class="st">'roll_mean_{w}'</span>] <span class="op">=</span> y_shifted.rolling(w, min_periods<span class="op">=</span>w<span class="op">//</span><span class="nm">2</span>).mean()
+    df[f<span class="st">'roll_std_{w}'</span>]  <span class="op">=</span> y_shifted.rolling(w, min_periods<span class="op">=</span>w<span class="op">//</span><span class="nm">2</span>).std()
+    df[f<span class="st">'roll_min_{w}'</span>]  <span class="op">=</span> y_shifted.rolling(w, min_periods<span class="op">=</span>w<span class="op">//</span><span class="nm">2</span>).min()
+    df[f<span class="st">'roll_max_{w}'</span>]  <span class="op">=</span> y_shifted.rolling(w, min_periods<span class="op">=</span>w<span class="op">//</span><span class="nm">2</span>).max()
+
+<span class="cm"># EWM avec différents spans</span>
+<span class="kw">for</span> span <span class="kw">in</span> [<span class="nm">7</span>, <span class="nm">28</span>]:
+    df[f<span class="st">'ewm_mean_{span}'</span>] <span class="op">=</span> y_shifted.ewm(span<span class="op">=</span>span, adjust<span class="op">=</span><span class="kw">False</span>).mean()
+
+<span class="cm"># Features dérivées puissantes</span>
+df[<span class="st">'trend_7_28'</span>]     <span class="op">=</span> df[<span class="st">'roll_mean_7'</span>] <span class="op">-</span> df[<span class="st">'roll_mean_28'</span>]  <span class="cm"># momentum</span>
+df[<span class="st">'zscore_local'</span>]   <span class="op">=</span> (y_shifted <span class="op">-</span> df[<span class="st">'roll_mean_28'</span>]) <span class="op">/</span> (df[<span class="st">'roll_std_28'</span>] <span class="op">+</span> <span class="nm">1e-6</span>)`,
+      code_note: "min_periods=w//2 permet de calculer des statistiques même en début de série, avec une fenêtre incomplète. Ajuster selon la tolérance à l'incertitude des premières valeurs.",
+      complexity: { time: "O(n·W) où W = nombre de fenêtres", space: "O(n·W)" },
+      references: ["Hyndman & Athanasopoulos (2021) — Forecasting: Principles and Practice"]
+    },
+
+    // ═══ TEXTE ═══
+    {
+      id: "tfidf",
+      category: "text",
+      title: "TF-IDF Pondéré",
+      subtitle: "Term Frequency × Inverse Document Frequency",
+      difficulty: 1,
+      tags: ["NLP", "bag of words", "classification texte", "baseline"],
+      leakage_risk: true,
+      leakage_note: "TfidfVectorizer.fit() sur le corpus d'entraînement uniquement. Utiliser .transform() sur le test.",
+      principle: "TF-IDF pondère chaque terme par sa fréquence dans le document (TF) et l'inverse de sa fréquence dans le corpus (IDF). Cela valorise les termes discriminants (fréquents dans peu de documents) et pénalise les termes trop communs ('le', 'de', ...). La représentation résultante est un vecteur creux de dimension |vocabulaire|.",
+      when_to_use: [
+        "Classification ou clustering de texte comme baseline rapide et efficace.",
+        "Courtes à moyennes longueurs de texte (articles, descriptions, emails).",
+        "Quand le vocabulaire est limité et connu (catégories de produits, codes médicaux).",
+        "Combiné avec une régression logistique ou un SVM linéaire : performances souvent comparables aux modèles plus complexes."
+      ],
+      when_not_to_use: [
+        "Textes très longs ou vocabulaire infini : explosion dimensionnelle.",
+        "Quand la sémantique et le contexte importent plus que les mots clés : utiliser des embeddings.",
+        "Langues morphologiquement riches sans stemming/lemmatisation préalable."
+      ],
+      formalism: {
+        latex: "\\text{TF-IDF}(t, d) = \\underbrace{\\frac{f_{t,d}}{\\sum_k f_{k,d}}}_{\\text{TF}} \\times \\underbrace{\\log\\frac{N+1}{n_t+1} + 1}_{\\text{IDF smooth}}",
+        explanation: "La version lissée de l'IDF (smooth_idf=True par défaut dans sklearn) évite les divisions par zéro pour les termes inconnus. La normalisation L2 des vecteurs TF-IDF est standard avant l'utilisation avec un cosinus de similarité.",
+        variables: [
+          { name: "f_{t,d}", desc: "Fréquence du terme t dans le document d" },
+          { name: "N", desc: "Nombre total de documents dans le corpus" },
+          { name: "n_t", desc: "Nombre de documents contenant le terme t" }
+        ]
+      },
+      implementation: `<span class="kw">from</span> sklearn.feature_extraction.text <span class="kw">import</span> TfidfVectorizer
+<span class="kw">from</span> sklearn.linear_model <span class="kw">import</span> LogisticRegression
+<span class="kw">from</span> sklearn.pipeline <span class="kw">import</span> Pipeline
+<span class="kw">import</span> scipy.sparse <span class="kw">as</span> sp
+
+<span class="cm"># Pipeline TF-IDF + classifieur</span>
+pipe <span class="op">=</span> Pipeline([
+    (<span class="st">'tfidf'</span>, TfidfVectorizer(
+        max_features<span class="op">=</span><span class="nm">50000</span>,        <span class="cm"># limiter le vocabulaire</span>
+        ngram_range<span class="op">=</span>(<span class="nm">1</span>, <span class="nm">2</span>),         <span class="cm"># uni + bigrammes</span>
+        min_df<span class="op">=</span><span class="nm">5</span>,                   <span class="cm"># ignorer les termes très rares</span>
+        max_df<span class="op">=</span><span class="nm">0.95</span>,               <span class="cm"># ignorer les termes trop communs</span>
+        sublinear_tf<span class="op">=</span><span class="kw">True</span>,          <span class="cm"># log(1+TF) → réduit l'effet des termes très fréquents</span>
+        strip_accents<span class="op">=</span><span class="st">'unicode'</span>
+    )),
+    (<span class="st">'clf'</span>, LogisticRegression(C<span class="op">=</span><span class="nm">1.0</span>, max_iter<span class="op">=</span><span class="nm">1000</span>))
+])
+pipe.fit(X_train[<span class="st">'texte'</span>], y_train)
+
+<span class="cm"># Extraction des features TF-IDF seules (sparse)</span>
+tfidf <span class="op">=</span> TfidfVectorizer(max_features<span class="op">=</span><span class="nm">10000</span>)
+X_tfidf_train <span class="op">=</span> tfidf.fit_transform(X_train[<span class="st">'texte'</span>])
+X_tfidf_test  <span class="op">=</span> tfidf.transform(X_test[<span class="st">'texte'</span>])
+
+<span class="cm"># Concaténer avec features tabulaires (sparse + dense)</span>
+X_combined <span class="op">=</span> sp.hstack([X_tfidf_train, sp.csr_matrix(X_train_numeric)])`,
+      code_note: "sublinear_tf=True remplace TF par log(1+TF), réduisant l'impact de la répétition abusive de mots. Toujours tester avec ngram_range=(1,2) : les bigrammes capturent souvent des collocations importantes.",
+      complexity: { time: "O(n·L·V) où L=longueur moy., V=taille vocabulaire", space: "O(n·V) sparse" },
+      references: ["Manning, Raghavan & Schütze (2008) — Introduction to Information Retrieval"]
+    },
+
+    {
+      id: "lda-topics",
+      category: "text",
+      title: "Topic Modeling (LDA)",
+      subtitle: "Features de probabilité d'appartenance aux topics",
+      difficulty: 3,
+      tags: ["NLP", "non-supervisé", "réduction dimensionnelle texte", "thématique"],
+      leakage_risk: true,
+      leakage_note: "LDA.fit() sur le corpus d'entraînement uniquement. .transform() sur le test.",
+      principle: "La Latent Dirichlet Allocation (LDA) modélise chaque document comme un mélange de K topics latents, chaque topic étant une distribution sur le vocabulaire. Les probabilités d'appartenance à chaque topic constituent des features denses et interprétables, comprimant la matrice TF-IDF (dimension V) en K dimensions.",
+      when_to_use: [
+        "Corpus volumineux avec vocabulaire large où les embeddings statiques sont trop coûteux.",
+        "Quand l'interprétabilité des features textuelles est nécessaire (chaque topic = groupe de mots).",
+        "Clustering de documents non supervisé.",
+        "Enrichissement d'un modèle tabulaire avec des features thématiques issues du texte."
+      ],
+      when_not_to_use: [
+        "Textes très courts (< 50 mots) : LDA est peu fiable sur des documents courts.",
+        "Quand on a accès à des embeddings pré-entraînés (BERT, etc.) : LDA est moins puissant."
+      ],
+      formalism: {
+        latex: "p(w | d) = \\sum_{k=1}^{K} p(w | z=k) \\cdot p(z=k | d), \\quad \\theta_d \\sim \\text{Dir}(\\alpha)",
+        explanation: "θ_d est le vecteur de mixing du document d (probabilités sur K topics). φ_k est la distribution sur le vocabulaire pour le topic k. Les deux sont estimés par variational EM. Les K vecteurs θ_d constituent les features de topic.",
+        variables: [
+          { name: "K", desc: "Nombre de topics (hyperparamètre à choisir par perplexité ou cohérence)" },
+          { name: "α", desc: "Prior de Dirichlet sur θ (α < 1 → documents spécialisés, α > 1 → mélange)" },
+          { name: "θ_d", desc: "Vecteur de K probabilités : features de topic pour le document d" }
+        ]
+      },
+      implementation: `<span class="kw">from</span> sklearn.decomposition <span class="kw">import</span> LatentDirichletAllocation
+<span class="kw">from</span> sklearn.feature_extraction.text <span class="kw">import</span> CountVectorizer
+
+<span class="cm"># Étape 1 : BoW (LDA fonctionne sur des counts, pas TF-IDF)</span>
+vectorizer <span class="op">=</span> CountVectorizer(max_features<span class="op">=</span><span class="nm">20000</span>, min_df<span class="op">=</span><span class="nm">5</span>, max_df<span class="op">=</span><span class="nm">0.9</span>)
+X_bow_train <span class="op">=</span> vectorizer.fit_transform(X_train[<span class="st">'texte'</span>])
+X_bow_test  <span class="op">=</span> vectorizer.transform(X_test[<span class="st">'texte'</span>])
+
+<span class="cm"># Étape 2 : LDA — choisir K par cohérence (c_v)</span>
+lda <span class="op">=</span> LatentDirichletAllocation(
+    n_components<span class="op">=</span><span class="nm">20</span>,         <span class="cm"># K topics</span>
+    max_iter<span class="op">=</span><span class="nm">20</span>,
+    learning_method<span class="op">=</span><span class="st">'online'</span>,  <span class="cm"># plus rapide sur grands corpus</span>
+    random_state<span class="op">=</span><span class="nm">42</span>
+)
+lda.fit(X_bow_train)
+
+X_topics_train <span class="op">=</span> lda.transform(X_bow_train)  <span class="cm"># (n, K) — features de topic</span>
+X_topics_test  <span class="op">=</span> lda.transform(X_bow_test)
+
+<span class="cm"># Nommer les topics (top 10 mots par topic)</span>
+feature_names <span class="op">=</span> vectorizer.get_feature_names_out()
+<span class="kw">for</span> i, topic <span class="kw">in</span> enumerate(lda.components_):
+    top_words <span class="op">=</span> [feature_names[j] <span class="kw">for</span> j <span class="kw">in</span> topic.argsort()[:<span class="op">-</span><span class="nm">10</span><span class="op">-</span><span class="nm">1</span>:<span class="op">-</span><span class="nm">1</span>]]
+    print(f<span class="st">"Topic {i}: {', '.join(top_words)}"</span>)`,
+      code_note: "LDA nécessite des counts (CountVectorizer), pas des valeurs TF-IDF continues. Le choix de K est crucial : utiliser la cohérence c_v (gensim) ou la perplexité sur un jeu de validation.",
+      complexity: { time: "O(n·V·K·iter)", space: "O(V·K + n·K)" },
+      references: ["Blei, Ng & Jordan (2003) — JMLR", "sklearn.decomposition.LatentDirichletAllocation"]
+    },
+
+    // ═══ CLUSTER ═══
+    {
+      id: "kmeans-distances",
+      category: "cluster",
+      title: "Features de Clustering K-Means",
+      subtitle: "Distance aux centroïdes comme représentation dense",
+      difficulty: 2,
+      tags: ["non-supervisé", "dense features", "segmentation", "distance"],
+      leakage_risk: true,
+      leakage_note: "K-Means doit être fitté sur X_train uniquement. Ne pas inclure la target dans le clustering.",
+      principle: "Un K-Means est entraîné sur les features numériques. Pour chaque observation, on calcule soit l'appartenance au cluster le plus proche (feature catégorielle), soit les distances euclidiennes à tous les K centroïdes (K features numériques continues). Ces distances encodent la structure non-linéaire des données et peuvent considérablement enrichir un modèle linéaire.",
+      when_to_use: [
+        "Données avec une structure de clusters naturelle non exploitée par le modèle.",
+        "Enrichissement d'un modèle linéaire avec une représentation non-linéaire.",
+        "Réduction d'un grand nombre de features par la médiation du clustering.",
+        "Segmentation client : la distance au centroïde du cluster 'fidèle' est une feature RFM."
+      ],
+      when_not_to_use: [
+        "Features très hétérogènes sans standardisation préalable : les distances euclidiennes sont biaisées.",
+        "Données de haute dimension sans PCA préalable (malédiction de la dimensionnalité pour K-Means)."
+      ],
+      formalism: {
+        latex: "d_k(\\mathbf{x}) = \\|\\mathbf{x} - \\boldsymbol{\\mu}_k\\|_2, \\quad \\mathbf{f}(\\mathbf{x}) = [d_1(\\mathbf{x}), \\ldots, d_K(\\mathbf{x})]",
+        explanation: "On crée K features numériques continues (une par centroïde). Alternativement, on crée une seule feature catégorielle (cluster_id = argmin_k d_k(x)). Les deux encodages sont complémentaires.",
+        variables: [
+          { name: "μ_k", desc: "Centroïde du cluster k (vecteur de dimension p)" },
+          { name: "d_k(x)", desc: "Distance euclidienne de x au centroïde k" },
+          { name: "K", desc: "Nombre de clusters (hyperparamètre, valider par silhouette ou elbow)" }
+        ]
+      },
+      implementation: `<span class="kw">from</span> sklearn.cluster <span class="kw">import</span> KMeans
+<span class="kw">from</span> sklearn.preprocessing <span class="kw">import</span> StandardScaler
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+<span class="kw">import</span> pandas <span class="kw">as</span> pd
+
+<span class="cm"># Standardiser avant K-Means (obligatoire)</span>
+scaler <span class="op">=</span> StandardScaler()
+X_train_sc <span class="op">=</span> scaler.fit_transform(X_train[numeric_cols])
+X_test_sc  <span class="op">=</span> scaler.transform(X_test[numeric_cols])
+
+<span class="cm"># K-Means fitté sur le train uniquement</span>
+kmeans <span class="op">=</span> KMeans(n_clusters<span class="op">=</span><span class="nm">10</span>, n_init<span class="op">=</span><span class="nm">10</span>, random_state<span class="op">=</span><span class="nm">42</span>)
+kmeans.fit(X_train_sc)
+
+<span class="cm"># Feature 1 : ID du cluster (catégorielle)</span>
+X_train[<span class="st">'cluster_id'</span>] <span class="op">=</span> kmeans.predict(X_train_sc)
+X_test[<span class="st">'cluster_id'</span>]  <span class="op">=</span> kmeans.predict(X_test_sc)
+
+<span class="cm"># Feature 2 : distances à tous les centroïdes (K features continues)</span>
+dist_train <span class="op">=</span> kmeans.transform(X_train_sc)  <span class="cm"># (n, K)</span>
+dist_test  <span class="op">=</span> kmeans.transform(X_test_sc)
+
+dist_cols <span class="op">=</span> [f<span class="st">'dist_cluster_{k}'</span> <span class="kw">for</span> k <span class="kw">in</span> range(kmeans.n_clusters)]
+X_train[dist_cols] <span class="op">=</span> dist_train
+X_test[dist_cols]  <span class="op">=</span> dist_test`,
+      code_note: "Valider K avec silhouette_score (plus lent) ou inertia (elbow method). En général, K entre 5 et 20 donne de bonnes features pour les modèles downstreams.",
+      complexity: { time: "O(n·K·p·iter)", space: "O(n·K)" },
+      references: ["Guo et al. (2016) — Deep Clustering Network", "sklearn.cluster.KMeans"]
+    },
+
+    // ═══ GEOSPATIAL ═══
+    {
+      id: "haversine",
+      category: "geo",
+      title: "Features Géospatiales",
+      subtitle: "Distance haversine, clustering géographique, H3",
+      difficulty: 2,
+      tags: ["géospatial", "latitude longitude", "distance", "immobilier"],
+      leakage_risk: false,
+      leakage_note: "Les features géospatiales sont calculées à partir des coordonnées uniquement, sans la cible.",
+      principle: "À partir de coordonnées GPS (latitude, longitude), on construit des features de distance (haversine vers des points d'intérêt), des features de segmentation géographique (indexation H3 hexagonale), et des agrégats spatiaux. Ces features capturent des effets de localisation que les modèles ne peuvent pas inférer des coordonnées brutes.",
+      when_to_use: [
+        "Données avec coordonnées GPS : immobilier, livraison, mobilité, retail.",
+        "Effet de la proximité à des points d'intérêt (gares, écoles, centres commerciaux).",
+        "Agrégats par zone géographique : prix moyen au m² par hexagone H3.",
+        "Détection de clusters géographiques d'événements (fraude, accidents)."
+      ],
+      when_not_to_use: [
+        "Coordonnées peu précises ou agrégées à des niveaux trop grossiers.",
+        "Absence de points d'intérêt pertinents pour le domaine."
+      ],
+      formalism: {
+        latex: "d_{\\text{hav}}(A, B) = 2r \\arcsin\\!\\sqrt{\\sin^2\\!\\frac{\\Delta\\phi}{2} + \\cos\\phi_A\\cos\\phi_B\\sin^2\\!\\frac{\\Delta\\lambda}{2}}",
+        explanation: "φ est la latitude en radians, λ la longitude en radians, r=6371 km le rayon terrestre. La distance haversine est la distance géodésique sur la surface sphérique, à distinguer de la distance euclidienne en coordonnées projetées.",
+        variables: [
+          { name: "Δφ", desc: "Différence de latitudes en radians" },
+          { name: "Δλ", desc: "Différence de longitudes en radians" },
+          { name: "r", desc: "Rayon de la Terre = 6371 km" }
+        ]
+      },
+      implementation: `<span class="kw">import</span> numpy <span class="kw">as</span> np
+<span class="kw">import</span> pandas <span class="kw">as</span> pd
+
+<span class="kw">def</span> <span class="fn">haversine</span>(lat1, lon1, lat2, lon2):
+    <span class="st">"""Distance haversine en km entre deux points GPS."""</span>
+    R <span class="op">=</span> <span class="nm">6371</span>
+    phi1, phi2 <span class="op">=</span> np.radians(lat1), np.radians(lat2)
+    dphi    <span class="op">=</span> np.radians(lat2 <span class="op">-</span> lat1)
+    dlambda <span class="op">=</span> np.radians(lon2 <span class="op">-</span> lon1)
+    a <span class="op">=</span> np.sin(dphi<span class="op">/</span><span class="nm">2</span>)<span class="op">**</span><span class="nm">2</span> <span class="op">+</span> np.cos(phi1)<span class="op">*</span>np.cos(phi2)<span class="op">*</span>np.sin(dlambda<span class="op">/</span><span class="nm">2</span>)<span class="op">**</span><span class="nm">2</span>
+    <span class="kw">return</span> <span class="nm">2</span> <span class="op">*</span> R <span class="op">*</span> np.arcsin(np.sqrt(a))
+
+<span class="cm"># Points d'intérêt (ex: gares parisiennes)</span>
+pois <span class="op">=</span> {
+    <span class="st">'gare_nord'</span>:   (<span class="nm">48.8809</span>, <span class="nm">2.3553</span>),
+    <span class="st">'tour_eiffel'</span>: (<span class="nm">48.8584</span>, <span class="nm">2.2945</span>),
+    <span class="st">'la_defense'</span>:  (<span class="nm">48.8924</span>, <span class="nm">2.2362</span>)
+}
+<span class="kw">for</span> name, (lat, lon) <span class="kw">in</span> pois.items():
+    df[f<span class="st">'dist_{name}'</span>] <span class="op">=</span> haversine(df[<span class="st">'lat'</span>], df[<span class="st">'lon'</span>], lat, lon)
+
+<span class="cm"># Indexation H3 (hexagones de résolution variable)</span>
+<span class="kw">import</span> h3
+df[<span class="st">'h3_r8'</span>] <span class="op">=</span> df.apply(<span class="kw">lambda</span> r: h3.geo_to_h3(r[<span class="st">'lat'</span>], r[<span class="st">'lon'</span>], <span class="nm">8</span>), axis<span class="op">=</span><span class="nm">1</span>)
+
+<span class="cm"># Agrégats par hexagone (jointure spatiale)</span>
+h3_stats <span class="op">=</span> df.groupby(<span class="st">'h3_r8'</span>)[<span class="st">'prix'</span>].agg([<span class="st">'mean'</span>, <span class="st">'count'</span>]).reset_index()
+df <span class="op">=</span> df.merge(h3_stats, on<span class="op">=</span><span class="st">'h3_r8'</span>, how<span class="op">=</span><span class="st">'left'</span>)`,
+      code_note: "La résolution H3 (r=8 ≈ 0.74 km², r=9 ≈ 0.1 km²) est un hyperparamètre spatial à valider. Des résolutions multiples peuvent être utilisées simultanément.",
+      complexity: { time: "O(n·|POI|)", space: "O(n·|POI|)" },
+      references: ["Uber H3 library", "haversine Python library", "OSMnx pour les points d'intérêt"]
+    },
+
+    // ═══ MISSING ═══
+    {
+      id: "mice",
+      category: "missing",
+      title: "MICE — Imputation Multiple",
+      subtitle: "Multiple Imputation by Chained Equations",
+      difficulty: 3,
+      tags: ["données manquantes", "MAR", "imputation avancée", "préserve corrélations"],
+      leakage_risk: true,
+      leakage_note: "IterativeImputer doit être fitté sur X_train uniquement. Appliquer .transform() sur X_test.",
+      principle: "MICE (Multiple Imputation by Chained Equations) impute itérativement chaque variable manquante en la régressant sur toutes les autres variables (observées et précédemment imputées). Le processus cycle sur toutes les variables jusqu'à convergence. Cette méthode préserve les relations entre variables, contrairement aux imputations univariées (moyenne, médiane).",
+      when_to_use: [
+        "Données MCAR (Missing Completely At Random) ou MAR (Missing At Random) avec de nombreuses variables corrélées.",
+        "Taux de manquants modéré (5–30%) : au-delà, les imputations deviennent peu fiables.",
+        "Variables numériques avec corrélations inter-variables à préserver.",
+        "Analyses statistiques exigeant une imputation robuste (pas juste pour ML)."
+      ],
+      when_not_to_use: [
+        "Données MNAR (Missing Not At Random) : le mécanisme de manque est lié à la valeur manquante elle-même (ex: les patients les plus malades refusent de répondre). MICE sera biaisé.",
+        "Très grand dataset avec nombreuses variables : coût computationnel élevé.",
+        "Taux de manquants > 50% : l'imputation devient spéculative."
+      ],
+      formalism: {
+        latex: "X_j^{(t)} \\sim p(X_j | X_{-j}^{(t)}, \\theta_j^{(t)}), \\quad j = 1, \\ldots, p, \\quad t = 1, \\ldots, T",
+        explanation: "MICE effectue T cycles (t) d'imputation. À chaque cycle, chaque variable j est réimputée en régressant sur toutes les autres X_{-j}. La convergence est atteinte quand les imputations se stabilisent.",
+        variables: [
+          { name: "X_{-j}", desc: "Toutes les variables sauf j (incluant cibles déjà imputées)" },
+          { name: "θ_j", desc: "Paramètres du modèle de régression pour la variable j" },
+          { name: "T", desc: "Nombre de cycles (max_iter dans sklearn, défaut 10)" }
+        ]
+      },
+      implementation: `<span class="kw">from</span> sklearn.experimental <span class="kw">import</span> enable_iterative_imputer
+<span class="kw">from</span> sklearn.impute <span class="kw">import</span> IterativeImputer, MissingIndicator
+<span class="kw">from</span> sklearn.linear_model <span class="kw">import</span> BayesianRidge
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+
+<span class="cm"># ✅ Étape 0 : toujours ajouter un indicateur de manque AVANT imputation</span>
+indicator <span class="op">=</span> MissingIndicator(features<span class="op">=</span><span class="st">'missing-only'</span>)
+X_train_flags <span class="op">=</span> indicator.fit_transform(X_train)
+X_test_flags  <span class="op">=</span> indicator.transform(X_test)
+
+<span class="cm"># MICE avec BayesianRidge (recommandé)</span>
+imputer <span class="op">=</span> IterativeImputer(
+    estimator<span class="op">=</span>BayesianRidge(),
+    max_iter<span class="op">=</span><span class="nm">10</span>,
+    initial_strategy<span class="op">=</span><span class="st">'median'</span>,   <span class="cm"># initialisation avant cycles</span>
+    imputation_order<span class="op">=</span><span class="st">'ascending'</span>, <span class="cm"># commencer par les colonnes les moins manquantes</span>
+    random_state<span class="op">=</span><span class="nm">42</span>
+)
+X_train_imp <span class="op">=</span> imputer.fit_transform(X_train)  <span class="cm"># fit sur train</span>
+X_test_imp  <span class="op">=</span> imputer.transform(X_test)         <span class="cm"># transform sur test</span>
+
+<span class="cm"># Concaténer avec les indicateurs de manque</span>
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+X_train_final <span class="op">=</span> np.hstack([X_train_imp, X_train_flags])
+X_test_final  <span class="op">=</span> np.hstack([X_test_imp, X_test_flags])`,
+      code_note: "L'ajout des MissingIndicators est indispensable : le fait qu'une donnée soit manquante peut être informatif (ex: absence de revenu déclaré en crédit scoring). Ne jamais imputer sans conserver cet indicateur.",
+      complexity: { time: "O(T·p·n·p) ≈ O(T·n·p²)", space: "O(n·p)" },
+      references: ["van Buuren & Groothuis-Oudshoorn (2011) — JOSS", "sklearn.impute.IterativeImputer"]
+    },
+
+    {
+      id: "missing-indicator",
+      category: "missing",
+      title: "Missing Indicator",
+      subtitle: "La donnée absente comme feature informative",
+      difficulty: 1,
+      tags: ["données manquantes", "MCAR", "MAR", "MNAR", "toujours utile"],
+      leakage_risk: false,
+      leakage_note: "Calculé sur X uniquement. Pas de risque de fuite.",
+      principle: "Avant toute imputation, ajouter une colonne binaire (0/1) pour chaque variable ayant des valeurs manquantes. Cette feature encode si la valeur originale était manquante. En credit scoring, l'absence de déclaration de revenus ou de patrimoine est souvent un fort prédicteur du risque, indépendamment de la valeur imputée.",
+      when_to_use: [
+        "Systématiquement, avant toute imputation, quelle que soit la méthode choisie.",
+        "Quand le mécanisme de manque est MNAR : la raison du manque est informative.",
+        "En détection de fraude : les champs non remplis peuvent être un signal comportemental.",
+        "Taux de manquants hétérogène entre classes (test de proportions Chi² pour valider)."
+      ],
+      when_not_to_use: [
+        "Variables avec moins de 1% de manquants : l'indicateur sera presque constant et peu informatif.",
+        "Si tous les indicateurs sont parfaitement corrélés : regrouper les patterns de manque."
+      ],
+      formalism: {
+        latex: "m_j(\\mathbf{x}) = \\mathbf{1}[x_j \\text{ est manquant}] \\in \\{0, 1\\}",
+        explanation: "Pour chaque feature j avec des valeurs manquantes, on crée m_j binaire. On peut aussi créer un indicateur de pattern global (combinaison des colonnes manquantes) pour capturer les corrélations de manquants.",
+        variables: [
+          { name: "m_j", desc: "Indicateur binaire : 1 si x_j est manquant, 0 sinon" },
+          { name: "pattern", desc: "Combinaison des indicateurs : identifiant du pattern de manque complet" }
+        ]
+      },
+      implementation: `<span class="kw">import</span> pandas <span class="kw">as</span> pd
+<span class="kw">import</span> numpy <span class="kw">as</span> np
+<span class="kw">from</span> sklearn.impute <span class="kw">import</span> MissingIndicator
+
+<span class="cm"># Méthode 1 : pandas (simple)</span>
+missing_cols <span class="op">=</span> [c <span class="kw">for</span> c <span class="kw">in</span> X_train.columns <span class="kw">if</span> X_train[c].isna().any()]
+<span class="kw">for</span> col <span class="kw">in</span> missing_cols:
+    pct <span class="op">=</span> X_train[col].isna().mean()
+    <span class="kw">if</span> pct <span class="op">&gt;</span> <span class="nm">0.01</span>:  <span class="cm"># seuil minimal</span>
+        X_train[f<span class="st">'{col}_missing'</span>] <span class="op">=</span> X_train[col].isna().astype(int)
+        X_test[f<span class="st">'{col}_missing'</span>]  <span class="op">=</span> X_test[col].isna().astype(int)
+        print(f<span class="st">"{col}: {pct:.1%} manquants"</span>)
+
+<span class="cm"># Méthode 2 : sklearn (plus robuste)</span>
+indicator <span class="op">=</span> MissingIndicator(features<span class="op">=</span><span class="st">'missing-only'</span>, error_on_new<span class="op">=</span><span class="kw">False</span>)
+flags_train <span class="op">=</span> indicator.fit_transform(X_train)
+flags_test  <span class="op">=</span> indicator.transform(X_test)
+
+<span class="cm"># Feature de pattern global : identifiant unique du pattern de manque</span>
+X_train[<span class="st">'missing_pattern'</span>] <span class="op">=</span> (
+    X_train[missing_cols].isna().astype(str).agg(<span class="st">''</span>.join, axis<span class="op">=</span><span class="nm">1</span>)
+)`,
+      code_note: "La feature 'missing_pattern' est particulièrement puissante en credit scoring et détection de fraude : elle encode la combinaison complète des champs manquants, qui peut être hautement corrélée au risque.",
+      complexity: { time: "O(n·p)", space: "O(n·p_missing)" },
+      references: ["van Buuren (2018) — Flexible Imputation of Missing Data", "Little & Rubin (2002)"]
+    },
+
+    // ═══ GRAPH ═══
+    {
+      id: "graph-centrality",
+      category: "graph",
+      title: "Features de Centralité de Graphe",
+      subtitle: "PageRank, Betweenness, Degree comme features",
+      difficulty: 3,
+      tags: ["réseaux", "transactions", "anti-fraude", "PageRank"],
+      leakage_risk: false,
+      leakage_note: "Les mesures de centralité sont calculées sur le graphe des données sans utiliser la cible. Attention : si la topologie du graphe encode implicitement la cible (ex: un sous-graphe de fraudeurs), un risque structurel existe.",
+      principle: "Dans un graphe (réseau social, graphe de transactions, graphe d'interaction), chaque nœud peut être caractérisé par des mesures de centralité : son degré (nombre de connexions), son PageRank (importance globale selon la propagation de probabilité), sa betweenness centrality (nombre de chemins les plus courts passant par ce nœud). Ces mesures capturent l'influence et le rôle structurel de chaque entité.",
+      when_to_use: [
+        "Détection de fraude : les nœuds centraux dans un graphe de transactions frauduleuses.",
+        "Réseaux sociaux : l'influence d'un utilisateur comme feature prédictive de churn ou d'adoption.",
+        "Scoring d'entreprises : importance dans le réseau de partenariats commerciaux.",
+        "Systèmes de recommandation : rang dans le graphe utilisateur-item."
+      ],
+      when_not_to_use: [
+        "Graphes très denses ou très grands (>100K nœuds) : betweenness centrality est O(n³), impraticable.",
+        "Données sans structure relationnelle naturelle : la construction artificielle d'un graphe peut introduire du bruit."
+      ],
+      formalism: {
+        latex: "PR(u) = \\frac{1-d}{N} + d \\sum_{v \\in B_u} \\frac{PR(v)}{L(v)}, \\quad BC(v) = \\sum_{s \\neq v \\neq t} \\frac{\\sigma(s,t|v)}{\\sigma(s,t)}",
+        explanation: "PageRank PR(u) : probabilité stationnaire d'un marcheur aléatoire (d=0.85). Betweenness centrality BC(v) : fraction des chemins les plus courts passant par v.",
+        variables: [
+          { name: "d", desc: "Facteur de damping PageRank (typiquement 0.85)" },
+          { name: "σ(s,t|v)", desc: "Nombre de chemins les plus courts de s à t passant par v" },
+          { name: "L(v)", desc: "Nombre de liens sortants du nœud v" }
+        ]
+      },
+      implementation: `<span class="kw">import</span> networkx <span class="kw">as</span> nx
+<span class="kw">import</span> pandas <span class="kw">as</span> pd
+
+<span class="cm"># Construction du graphe à partir d'un DataFrame de transactions</span>
+G <span class="op">=</span> nx.from_pandas_edgelist(
+    df_transactions,
+    source<span class="op">=</span><span class="st">'sender_id'</span>,
+    target<span class="op">=</span><span class="st">'receiver_id'</span>,
+    edge_attr<span class="op">=</span><span class="st">'amount'</span>,
+    create_using<span class="op">=</span>nx.DiGraph()
+)
+
+<span class="cm"># Mesures de centralité</span>
+pagerank     <span class="op">=</span> nx.pagerank(G, alpha<span class="op">=</span><span class="nm">0.85</span>)
+in_degree    <span class="op">=</span> dict(G.in_degree())
+out_degree   <span class="op">=</span> dict(G.out_degree())
+
+<span class="cm"># Betweenness sur un échantillon (trop lent sur grand graphe)</span>
+betweenness <span class="op">=</span> nx.betweenness_centrality(G, k<span class="op">=</span>min(<span class="nm">500</span>, len(G)), normalized<span class="op">=</span><span class="kw">True</span>)
+
+<span class="cm"># Convertir en DataFrame et joindre</span>
+centrality_df <span class="op">=</span> pd.DataFrame({
+    <span class="st">'node_id'</span>:     list(pagerank.keys()),
+    <span class="st">'pagerank'</span>:    list(pagerank.values()),
+    <span class="st">'in_degree'</span>:   [in_degree.get(n, <span class="nm">0</span>) <span class="kw">for</span> n <span class="kw">in</span> pagerank],
+    <span class="st">'out_degree'</span>:  [out_degree.get(n, <span class="nm">0</span>) <span class="kw">for</span> n <span class="kw">in</span> pagerank],
+    <span class="st">'betweenness'</span>: [betweenness.get(n, <span class="nm">0</span>) <span class="kw">for</span> n <span class="kw">in</span> pagerank]
+})
+df <span class="op">=</span> df.merge(centrality_df, left_on<span class="op">=</span><span class="st">'user_id'</span>, right_on<span class="op">=</span><span class="st">'node_id'</span>, how<span class="op">=</span><span class="st">'left'</span>)`,
+      code_note: "Pour les graphes très larges, utiliser betweenness_centrality(k=500) pour une approximation. La library graph-tool ou igraph est plus rapide que networkx sur les très grands graphes.",
+      complexity: { time: "O(n·m) PageRank, O(n³) Betweenness exacte, O(k·m) approx.", space: "O(n+m)" },
+      references: ["Page et al. (1999) — The PageRank Citation Ranking", "Brandes (2001) — A Faster Algorithm for Betweenness Centrality"]
+    },
+
+    // ═══ PACKAGING ═══
+    {
+      id: "dfs-featuretools",
+      category: "packaging",
+      title: "Deep Feature Synthesis (DFS)",
+      subtitle: "Génération automatique de features à partir de tables relationnelles",
+      difficulty: 3,
+      tags: ["auto feature engineering", "featuretools", "multi-tables", "relations"],
+      leakage_risk: true,
+      leakage_note: "DFS sur des tables avec timestamps : utiliser le paramètre cutoff_time pour éviter la fuite temporelle. Sans timestamp, calculer les agrégats sur le train uniquement.",
+      principle: "Le Deep Feature Synthesis (DFS) parcourt récursivement les relations entre tables (EntitySet) et applique des fonctions de transformation (TransformPrimitives : log, cum_sum, diff) et d'agrégation (AggregationPrimitives : mean, std, count, nunique, trend) pour générer automatiquement des centaines à milliers de features. Le terme 'Deep' réfère à la profondeur des relations entre tables, pas au Deep Learning.",
+      when_to_use: [
+        "Données relationnelles multi-tables avec des clés de jointure (ex: clients → commandes → produits).",
+        "Exploration rapide : DFS génère des features de base sur lesquelles on peut construire.",
+        "Quand le feature engineering manuel est chronophage et qu'on veut une baseline automatisée.",
+        "Combiné avec une sélection de features pour éliminer les features redondantes générées."
+      ],
+      when_not_to_use: [
+        "Table unique sans relations : DFS apporte peu, le feature crossing manuel est plus efficace.",
+        "Quand la généralisation est critique : les centaines de features générées peuvent sur-fitter.",
+        "Sans cutoff_time sur des données temporelles : data leakage quasi-garanti."
+      ],
+      formalism: {
+        latex: "f_{\\text{DFS}} = \\text{Agg}\\left(\\text{Transform}(X_{\\text{child}}), \\text{group\_by} = \\text{key}\\right)",
+        explanation: "DFS compose récursivement des primitives. Ex : SUM(DIFF(commandes.montant)) sur la table clients calcule la somme des différences entre commandes successives par client. La profondeur 2+ crée des features complexes.",
+        variables: [
+          { name: "EntitySet", desc: "Graphe de tables avec leurs relations (clés primaires/étrangères)" },
+          { name: "AggPrimitives", desc: "Mean, Std, Count, NUnique, Sum, Trend, Last, First..." },
+          { name: "TransformPrimitives", desc: "Log, CumSum, Diff, DayOfWeek, Percentile..." }
+        ]
+      },
+      implementation: `<span class="kw">import</span> featuretools <span class="kw">as</span> ft
+<span class="kw">import</span> pandas <span class="kw">as</span> pd
+
+<span class="cm"># Construire l'EntitySet (graphe de tables)</span>
+es <span class="op">=</span> ft.EntitySet(id<span class="op">=</span><span class="st">'dataset'</span>)
+
+es <span class="op">=</span> es.add_dataframe(
+    dataframe_name<span class="op">=</span><span class="st">'clients'</span>,
+    dataframe<span class="op">=</span>df_clients,
+    index<span class="op">=</span><span class="st">'client_id'</span>
+)
+es <span class="op">=</span> es.add_dataframe(
+    dataframe_name<span class="op">=</span><span class="st">'commandes'</span>,
+    dataframe<span class="op">=</span>df_commandes,
+    index<span class="op">=</span><span class="st">'commande_id'</span>,
+    time_index<span class="op">=</span><span class="st">'date_commande'</span>  <span class="cm"># pour le cutoff temporel</span>
+)
+es <span class="op">=</span> es.add_relationship(<span class="st">'clients'</span>, <span class="st">'client_id'</span>, <span class="st">'commandes'</span>, <span class="st">'client_id'</span>)
+
+<span class="cm"># DFS avec primitives sélectionnées</span>
+feature_matrix, features <span class="op">=</span> ft.dfs(
+    entityset<span class="op">=</span>es,
+    target_dataframe_name<span class="op">=</span><span class="st">'clients'</span>,
+    agg_primitives<span class="op">=</span>[<span class="st">'mean'</span>, <span class="st">'std'</span>, <span class="st">'count'</span>, <span class="st">'sum'</span>, <span class="st">'nunique'</span>, <span class="st">'trend'</span>],
+    trans_primitives<span class="op">=</span>[<span class="st">'day'</span>, <span class="st">'month'</span>, <span class="st">'diff'</span>],
+    max_depth<span class="op">=</span><span class="nm">2</span>,             <span class="cm"># profondeur de composition</span>
+    cutoff_time<span class="op">=</span>cutoff_df    <span class="cm"># éviter data leakage temporel</span>
+)
+
+print(f<span class="st">"Features générées : {feature_matrix.shape[1]}"</span>)
+
+<span class="cm"># Sélection post-DFS indispensable</span>
+<span class="kw">from</span> featuretools.selection <span class="kw">import</span> remove_low_information_features
+feature_matrix <span class="op">=</span> remove_low_information_features(feature_matrix)`,
+      code_note: "DFS peut générer des milliers de features, dont beaucoup sont redondantes. Toujours enchaîner avec une sélection (SHAP, Boruta, ou variance thresholding). max_depth=2 est le bon compromis puissance/explosion dimensionnelle.",
+      complexity: { time: "O(exp(depth)·n·p)", space: "O(n·features_générées)" },
+      references: ["Kanter & Veeramachaneni (2015) — DSA", "featuretools.readthedocs.io"]
+    },
+
+
+    
+    {
+      "id": "catboost-encoding",
+      "category": "encoding",
+      "title": "CatBoost Encoding",
+      "subtitle": "Target encoding avec permutation et prior (CatBoost)",
+      "difficulty": 3,
+      "tags": ["haute cardinalité", "boosting", "anti-leakage", "catboost"],
+      "leakage_risk": false,
+      "leakage_note": "L'encodage CatBoost utilise une permutation aléatoire et un calcul en ligne qui évite toute fuite de la cible. Pas besoin d'out-of-fold.",
+      "principle": "CatBoost encode les variables catégorielles en remplaçant chaque valeur par une moyenne de la cible sur les observations précédentes dans une permutation aléatoire. Une prior (moyenne globale) est ajoutée pour lisser les petites catégories. Cette méthode est similaire à un target encoding out-of-fold mais sans KFold, plus rapide et sans leakage.",
+      "when_to_use": [
+        "Avec CatBoost directement : l'encodeur interne est optimal.",
+        "Pour préparer des features catégorielles avant d'utiliser XGBoost ou LightGBM : plus robuste que le target encoding classique.",
+        "Quand vous avez une cardinalité très élevée (plusieurs milliers de modalités) et peu de temps pour faire du KFold encoding.",
+        "Pour toute tâche supervisée (classification/régression) où la cible est bien définie."
+      ],
+      "when_not_to_use": [
+        "Modèles linéaires : la transformation est non linéaire et corrélée à la cible, risque de surapprentissage.",
+        "Si la variable cible est très bruitée : l'encodage par permutation amplifie le bruit.",
+        "Très petits jeux de données (<1000 lignes) : l'estimation par observations passées est instable."
+      ],
+      "formalism": {
+        "latex": "\\hat{x}_{i}^{k} = \\frac{\\sum_{j=1}^{i-1} [\\sigma(j) = k] \\cdot y_{\\sigma(j)} + a \\cdot p}{\\sum_{j=1}^{i-1} [\\sigma(j) = k] + a}",
+        "explanation": "σ est une permutation aléatoire des indices. Pour la i-ème observation, on ne regarde que les observations précédentes dans l'ordre permuté. a est le paramètre de prior (≥1), p est la moyenne globale de la cible. La valeur encodée est une moyenne pondérée : plus il y a d'observations passées de la même catégorie, plus on s'éloigne de la prior.",
+        "variables": [
+          { "name": "σ", "desc": "Permutation aléatoire des indices (fixée avant entraînement)" },
+          { "name": "a", "desc": "Poids de la prior (default=1, plus élevé = plus de lissage)" },
+          { "name": "p", "desc": "Moyenne globale de la cible sur tout le train" }
+        ]
+      },
+      "implementation": "<span class=\"kw\">from</span> category_encoders <span class=\"kw\">import</span> CatBoostEncoder\n<span class=\"kw\">import</span> numpy <span class=\"kw\">as</span> np\n\n<span class=\"cm\"># Pas besoin de KFold : CatBoostEncoder gère la permutation en interne</span>\nencoder <span class=\"op\">=</span> CatBoostEncoder(\n    cols<span class=\"op\">=[</span><span class=\"st\">'city'</span>, <span class=\"st\">'product_id'</span><span class=\"op\">]</span>,\n    a<span class=\"op\">=</span><span class=\"nm\">1</span>,                     <span class=\"cm\"># paramètre de lissage (prior weight)</span>\n    random_state<span class=\"op\">=</span><span class=\"nm\">42</span>\n)\n\n<span class=\"cm\"># fit sur train, transform sur train et test</span>\nX_train_enc <span class=\"op\">=</span> encoder.fit_transform(X_train, y_train)\nX_test_enc  <span class=\"op\">=</span> encoder.transform(X_test)\n\n<span class=\"cm\"># En pratique, CatBoost le fait mieux nativement, mais cet encodeur peut être utilisé pour XGBoost.</span>\n<span class=\"cm\"># Attention : ne pas l'utiliser dans un pipeline avec CV simple, car la permutation est fixée. Préférer CV personnalisé ou utiliser directement CatBoost.</span>",
+      "code_note": "Le paramètre `a` (lissage) : a=1 est standard. Augmenter a → plus de lissage, utile pour les catégories très rares. Pour des datasets très bruités, a=3..10 peut améliorer la généralisation.",
+      "complexity": { "time": "O(n)", "space": "O(k)" },
+      "references": ["Prokhorenkova et al. (2018) — CatBoost: unbiased boosting with categorical features", "category_encoders.CatBoostEncoder"]
+    },
+    {
+      "id": "entity-embeddings",
+      "category": "encoding",
+      "title": "Entity Embeddings",
+      "subtitle": "Plongements neuronaux pour variables catégorielles haute cardinalité",
+      "difficulty": 3,
+      "tags": ["deep learning", "haute cardinalité", "embedding", "réseaux de neurones"],
+      "leakage_risk": false,
+      "leakage_note": "Les embeddings sont appris avec la cible, mais dans un cadre non linéaire. Risque de surapprentissage, pas de fuite au sens temporel si la validation est correcte.",
+      "principle": "Chaque modalité d'une variable catégorielle se voit attribuer un vecteur dense de faible dimension (typiquement 4 à 50) appris par rétropropagation via un réseau de neurones. Ces plongements capturent des similitudes sémantiques entre catégories. Après entraînement, ces vecteurs peuvent être utilisés comme features dans n'importe quel modèle (arbres, linéaire, etc.).",
+      "when_to_use": [
+        "Variables avec très haute cardinalité (milliers à millions de modalités) : les encodages classiques sont insuffisants.",
+        "Quand on a déjà un réseau de neurones dans la pipeline (ou du temps pour en entraîner un).",
+        "Catégories avec une structure latente (ex : produits, utilisateurs, codes postaux) où deux catégories proches sémantiquement doivent avoir des représentations proches.",
+        "Problèmes de recommandation, e-commerce, publicité en ligne."
+      ],
+      "when_not_to_use": [
+        "Petits jeux de données (< 10000 lignes) : les embeddings surapprennent.",
+        "Contrainte de temps ou de ressources : entraîner un réseau pour extraire des embeddings peut être lourd.",
+        "Modèles interprétables : les embeddings sont difficilement interprétables individuellement."
+      ],
+      "formalism": {
+        "latex": "\\mathbf{e}_j = \\mathbf{W}_{emb}^{(j)} \\cdot \\mathbf{one\\_hot}(x_j), \\quad \\mathbf{W}_{emb}^{(j)} \\in \\mathbb{R}^{d \\times |C_j|}",
+        "explanation": "Chaque variable catégorielle j a sa propre matrice d'embedding W_emb, de taille (dim_embedding × cardinalité). La sortie est un vecteur dense de dimension d. Les embeddings sont appris avec la tâche finale (classification/régression) via perte de gradient.",
+        "variables": [
+          { "name": "d", "desc": "Dimension de l'embedding (hyperparamètre, typiquement min(50, cardinalité/2))" },
+          { "name": "C_j", "desc": "Ensemble des modalités de la variable j" },
+          { "name": "one_hot(x_j)", "desc": "Vecteur one-hot de la modalité choisie" }
+        ]
+      },
+      "implementation": "<span class=\"kw\">import</span> torch\n<span class=\"kw\">import</span> torch.nn <span class=\"kw\">as</span> nn\n\n<span class=\"kw\">class</span> <span class=\"class\">EmbeddingModel</span>(nn.Module):\n    <span class=\"kw\">def</span> <span class=\"fn\">__init__</span>(self, cat_dims, emb_dims, num_cont, output_dim):\n        <span class=\"kw\">super</span>().<span class=\"fn\">__init__</span>()\n        self.embeddings <span class=\"op\">=</span> nn.ModuleList([\n            nn.Embedding(card, emb) <span class=\"kw\">for</span> card, emb <span class=\"kw\">in</span> <span class=\"fn\">zip</span>(cat_dims, emb_dims)\n        ])\n        self.fc <span class=\"op\">=</span> nn.Linear(<span class=\"fn\">sum</span>(emb_dims) <span class=\"op\">+</span> num_cont, output_dim)\n    \n    <span class=\"kw\">def</span> <span class=\"fn\">forward</span>(self, cat_data, cont_data):\n        emb <span class=\"op\">=</span> [emb_layer(cat_data[:, i]) <span class=\"kw\">for</span> i, emb_layer <span class=\"kw\">in</span> <span class=\"kw\">enumerate</span>(self.embeddings)]\n        emb <span class=\"op\">=</span> torch.cat(emb, dim<span class=\"op\">=</span><span class=\"nm\">1</span>)\n        <span class=\"kw\">return</span> self.fc(torch.cat([emb, cont_data], dim<span class=\"op\">=</span><span class=\"nm\">1</span>))\n\n<span class=\"cm\"># Après entraînement, récupérer les embeddings pour chaque catégorie</span>\n<span class=\"kw\">with</span> torch.no_grad():\n    city_emb <span class=\"op\">=</span> model.embeddings[0].weight.numpy()  <span class=\"cm\"># shape (n_cities, emb_dim)</span>\n\n<span class=\"cm\"># Remplacer l'ID de la ville par son vecteur d'embedding</span>\ndf_city_emb <span class=\"op\">=</span> pd.DataFrame(city_emb[df[<span class=\"st\">'city_id'</span>].values])",
+      "code_note": "La dimension d'embedding se choisit souvent entre 4 et 50. Une règle empirique : min(50, cardinalité // 2). Plus la cardinalité est grande, plus l'embedding peut être grand.",
+      "complexity": { "time": "O(n · d · époques)", "space": "O(cardinalité · d)" },
+      "references": ["Guo & Berkhahn (2016) — Entity Embeddings of Categorical Variables", "fast.ai — embeddings for categorical variables"]
+    },
+    {
+      "id": "shap-interaction",
+      "category": "crossing",
+      "title": "SHAP Interaction Values",
+      "subtitle": "Features d'interaction par valeurs de Shapley d'ordre 2",
+      "difficulty": 3,
+      "tags": ["interprétabilité", "interactions", "feature crossing", "shap"],
+      "leakage_risk": false,
+      "leakage_note": "Calculé a posteriori sur un modèle entraîné. Pas de leakage.",
+      "principle": "Les valeurs d'interaction SHAP (SHAP interaction indices) décomposent la prédiction en contributions principales (SHAP classique) et contributions d'interaction par paires de features. Pour chaque paire (i,j), on obtient un score d'interaction. On peut utiliser ces scores pour créer une nouvelle feature : le produit des features importantes pondéré par leur interaction, ou simplement ajouter le terme d'interaction brut.",
+      "when_to_use": [
+        "Détecter automatiquement quelles paires de features interagissent fortement pour les ajouter explicitement.",
+        "Améliorer des modèles linéaires : ajouter les interactions identifiées par SHAP.",
+        "Dans un modèle arborescent, les interactions SHAP révèlent des dépendances non capturées.",
+        "Compréhension métier des interactions avant de créer des features croisées."
+      ],
+      "when_not_to_use": [
+        "Très grand nombre de features (>100) : nombre de paires explosif.",
+        "Modèles non arborescents : le calcul SHAP kernel est extrêmement lent pour les interactions."
+      ],
+      "formalism": {
+        "latex": "\\phi_{i,j} = \\sum_{S \\subseteq F \\setminus \\{i,j\\}} \\frac{|S|!(|F|-|S|-2)!}{2(|F|-1)!} \\left[ v(S \\cup \\{i,j\\}) - v(S \\cup \\{i\\}) - v(S \\cup \\{j\\}) + v(S) \\right]",
+        "explanation": "L'interaction SHAP entre i et j est la part de la prédiction qui ne peut être attribuée ni à i seul ni à j seul, mais à leur combinaison. La somme des SHAP principaux plus les demi-interactions redonne la prédiction.",
+        "variables": [
+          { "name": "ϕ_{i,j}", "desc": "Valeur d'interaction entre feature i et feature j" },
+          { "name": "v(S)", "desc": "Valeur (prédiction) du modèle avec seulement les features de S" },
+          { "name": "F", "desc": "Ensemble complet des features" }
+        ]
+      },
+      "implementation": "<span class=\"kw\">import</span> shap\n<span class=\"kw\">import</span> xgboost <span class=\"kw\">as</span> xgb\n<span class=\"kw\">import</span> pandas <span class=\"kw\">as</span> pd\n\nmodel <span class=\"op\">=</span> xgb.XGBRegressor().fit(X_train, y_train)\nexplainer <span class=\"op\">=</span> shap.TreeExplainer(model)\nshap_interaction <span class=\"op\">=</span> explainer.shap_interaction_values(X_train)  <span class=\"cm\"># shape (n, p, p)</span>\n\n<span class=\"cm\"># Pour chaque paire, l'interaction SHAP moyenne (valeur absolue) donne son importance</span>\ninteraction_importance <span class=\"op\">=</span> np.abs(shap_interaction).mean(axis<span class=\"op\">=</span><span class=\"nm\">0</span>)\npd.DataFrame(interaction_importance, index<span class=\"op\">=</span>features, columns<span class=\"op\">=</span>features)\n\n<span class=\"cm\"># Créer une feature d'interaction pour la paire la plus importante</span>\nbest_pair <span class=\"op\">=</span> (feature_i, feature_j)\nX_train[<span class=\"st\">'interaction'</span>] <span class=\"op\">=</span> X_train[feature_i] <span class=\"op\">*</span> X_train[feature_j]\n\n<span class=\"cm\"># Visualisation matrice d'interaction</span>\nshap.summary_plot(shap_interaction, X_train, plot_type<span class=\"op\">=</span><span class=\"st\">'bar'</span>)",
+      "code_note": "La matrice d'interaction SHAP est symétrique et sa diagonale contient les SHAP principaux. Utiliser `shap_interaction_values()` nécessite TreeExplainer et un modèle arborescent (XGBoost, LightGBM, RandomForest).",
+      "complexity": { "time": "O(T · L · D² · p²)", "space": "O(n · p²)" },
+      "references": ["Lundberg et al. (2018) — Consistent Individualized Feature Attribution for Tree Ensembles", "SHAP documentation: interaction values"]
+    },
+    {
+      "id": "lasso-selection",
+      "category": "selection",
+      "title": "Séparation par Lasso (L1)",
+      "subtitle": "Sélection automatique de features par régularisation sphérique",
+      "difficulty": 2,
+      "tags": ["régression", "sélection automatique", "linéaire", "parcimonie"],
+      "leakage_risk": false,
+      "leakage_note": "Le Lasso est entraîné sur X_train, y_train. Pas de fuite.",
+      "principle": "La régression Lasso ajoute une pénalité L1 (valeur absolue des coefficients) à la fonction de perte. Cette pénalité force les coefficients des features non pertinentes à devenir exactement zéro. Ainsi, le Lasso effectue une sélection de features automatique, contrairement à Ridge (L2) qui ne les annule jamais.",
+      "when_to_use": [
+        "Prétraitement avant un modèle plus complexe (XGBoost, réseau) pour réduire la dimension.",
+        "Quand on a beaucoup de features (p > n) et qu'on soupçonne que seules quelques-unes sont utiles.",
+        "Modèles linéaires interprétables : le Lasso identifie explicitement les features à coefficient non nul.",
+        "Dans un pipeline automatisé de sélection de features."
+      ],
+      "when_not_to_use": [
+        "Features fortement corrélées : Lasso en choisit une au hasard (élastic net est meilleur).",
+        "Relations non linéaires : Lasso est un modèle linéaire, il ne capturera que des effets linéaires.",
+        "Quand la stabilité de la sélection est primordiale : le Lasso peut être instable sur petits échantillons."
+      ],
+      "formalism": {
+        "latex": "\\hat{\\beta} = \\arg\\min_{\\beta} \\left\\{ \\frac{1}{2n} \\| y - X\\beta \\|_2^2 + \\lambda \\| \\beta \\|_1 \\right\\}",
+        "explanation": "λ contrôle la force de la pénalité. Pour λ suffisamment grand, certains β_j deviennent exactement 0. Le chemin de régularisation montre l'ordre d'entrée des features.",
+        "variables": [
+          { "name": "λ", "desc": "Paramètre de régularisation (plus λ est grand, plus la sélection est agressive)" },
+          { "name": "‖β‖₁", "desc": "Somme des valeurs absolues des coefficients" },
+          { "name": "support", "desc": "Ensemble des features avec β_j ≠ 0" }
+        ]
+      },
+      "implementation": "<span class=\"kw\">from</span> sklearn.linear_model <span class=\"kw\">import</span> LassoCV\n<span class=\"kw\">import</span> numpy <span class=\"kw\">as</span> np\n\n<span class=\"cm\"># LassoCV choisit λ par validation croisée (optimisation de la performance)</span>\nlasso <span class=\"op\">=</span> LassoCV(cv<span class=\"op\">=</span><span class=\"nm\">5</span>, random_state<span class=\"op\">=</span><span class=\"nm\">42</span>, max_iter<span class=\"op\">=</span><span class=\"nm\">10000</span>)\nlasso.fit(X_train, y_train)\n\n<span class=\"cm\"># Récupérer les features sélectionnées (coefficients non nuls)</span>\nselected_features <span class=\"op\">=</span> X_train.columns[np.abs(lasso.coef_) <span class=\"op\">&gt;</span> <span class=\"nm\">1e-5</span>]\nprint(f<span class=\"st\">\"Features conservées : {len(selected_features)} / {X_train.shape[1]}\"</span>)\n\n<span class=\"cm\"># Utilisation avec scaling (obligatoire pour que la pénalité soit équitable)</span>\n<span class=\"kw\">from</span> sklearn.pipeline <span class=\"kw\">import</span> Pipeline\n<span class=\"kw\">from</span> sklearn.preprocessing <span class=\"kw\">import</span> StandardScaler\n\nlasso_pipeline <span class=\"op\">=</span> Pipeline([\n    (<span class=\"st\">'scaler'</span>, StandardScaler()),\n    (<span class=\"st\">'lasso'</span>, LassoCV(cv<span class=\"op\">=</span><span class=\"nm\">5</span>))\n])\nlasso_pipeline.fit(X_train, y_train)\n\n<span class=\"cm\"># Les coefficients sont obtenus après scaling</span>\ncoefs <span class=\"op\">=</span> lasso_pipeline.named_steps[<span class=\"st\">'lasso'</span>].coef_",
+      "code_note": "Toujours standardiser les variables avant Lasso, car la pénalité est sensible à l'échelle. Utiliser LassoCV pour choisir λ automatiquement. Si les features sont corrélées, préférer ElasticNet (mélange L1+L2).",
+      "complexity": { "time": "O(λ_paths · n · p)", "space": "O(p)" },
+      "references": ["Tibshirani (1996) — Regression Shrinkage and Selection via the Lasso", "scikit-learn LassoCV"]
+    }
+  
+  ]
+};
+</script>
+
+<div class="layout">
+
+  <!-- SIDEBAR -->
+  <aside class="sidebar">
+    <div class="sidebar-logo">
+      <div class="pre-title">Master Intelligence Artificielle</div>
+      <h1>Feature <em>Engineering</em> Avancé</h1>
+      <em>Pr. BENLAHMAR EL HABIB</em>
+    </div>
+
+    <div class="theme-toggle-wrap">
+  <span class="toggle-label">☀ Clair</span>
+  <label class="toggle-switch">
+    <input type="checkbox" id="themeToggle" checked>
+    <span class="toggle-track">
+      <span class="toggle-thumb"></span>
+    </span>
+  </label>
+  <span class="toggle-label">◑ Sombre</span>
+</div>
+
+    <div class="search-wrap">
+      <input class="search-input" type="text" placeholder="Rechercher une technique..." id="searchInput">
+    </div>
+
+    <div class="nav-section">
+      <div class="nav-section-label">Catégories</div>
+    </div>
+    <div id="navItems"></div>
+
+    
+
+    <div class="sidebar-footer">
+      Principes · Formalisme mathématique · Contextes d'utilisation · Pièges &amp; Leakage · Code Python
+    </div>
+  </aside>
+
+  <!-- MAIN -->
+  <main class="main">
+    <div class="hero">
+      <div class="hero-badge">✦ Techniques de référence</div>
+      <h2>Techniques <em>Avancées</em><br>de Feature Engineering</h2>
+      <p>Un guide exhaustif pour le praticien ML : chaque technique détaillée avec son formalisme, ses conditions d'utilisation, ses pièges (data leakage, complexité) et une implémentation Python complète et correcte.</p>
+      <div class="hero-stats">
+        <div class="hero-stat">
+          <div class="num" id="statTotal">30</div>
+          <div class="lbl">Techniques</div>
+        </div>
+        <div class="hero-stat">
+          <div class="num">13</div>
+          <div class="lbl">Catégories</div>
+        </div>
+        <div class="hero-stat">
+          <div class="num" id="statLeakage">—</div>
+          <div class="lbl">À risque leakage</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="content">
+      <div class="results-info" id="resultsInfo"></div>
+      <div class="cards-grid" id="cardsGrid"></div>
+      <div class="empty-state hidden" id="emptyState">
+        <div class="icon">◎</div>
+        <p>Aucune technique trouvée pour cette recherche.</p>
+      </div>
+    </div>
+  </main>
+</div>
+
+<!-- MODAL -->
+<div class="modal-overlay" id="modalOverlay">
+  <div class="modal" id="modal">
+    <div class="modal-hero" id="modalHero">
+      <button class="modal-close" id="modalClose">✕</button>
+      <div id="modalCatPill" class="modal-cat-pill"></div>
+      <div id="modalTitle" class="modal-title"></div>
+      <div id="modalSubtitle" class="modal-subtitle"></div>
+      <div class="modal-meta" id="modalMeta"></div>
+    </div>
+
+    <div class="modal-tabs">
+      <button class="tab-btn active" data-tab="principe">Principe</button>
+      <button class="tab-btn" data-tab="formalisme">Formalisme</button>
+      <button class="tab-btn" data-tab="implementation">Code Python</button>
+      <button class="tab-btn" data-tab="pieges">Pièges</button>
+      <button class="tab-btn" data-tab="references">Références</button>
+    </div>
+
+    <div class="modal-body" id="modalBody">
+      <div class="tab-panel active" id="tab-principe"></div>
+      <div class="tab-panel" id="tab-formalisme"></div>
+      <div class="tab-panel" id="tab-implementation"></div>
+      <div class="tab-panel" id="tab-pieges"></div>
+      <div class="tab-panel" id="tab-references"></div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ═══ INIT ═══
+const catMap = {};
+DATA.categories.forEach(c => { catMap[c.id] = c; });
+
+let currentCat = 'all';
+let searchQuery = '';
+
+// ═══ BUILD NAV ═══
+function buildNav() {
+  const container = document.getElementById('navItems');
+  DATA.categories.forEach(cat => {
+    const count = cat.id === 'all'
+      ? DATA.techniques.length
+      : DATA.techniques.filter(t => t.category === cat.id).length;
+
+    const btn = document.createElement('button');
+    btn.className = 'nav-item' + (cat.id === 'all' ? ' active' : '');
+    btn.dataset.cat = cat.id;
+    btn.innerHTML = `
+      <span class="nav-dot" style="background:${cat.color}"></span>
+      ${cat.label}
+      <span class="nav-count">${count}</span>
+    `;
+    btn.addEventListener('click', () => {
+      currentCat = cat.id;
+      document.querySelectorAll('.nav-item').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderCards();
+    });
+    container.appendChild(btn);
+  });
+}
+
+// ═══ BUILD CARDS ═══
+function getFilteredTechs() {
+  return DATA.techniques.filter(t => {
+    const matchCat = currentCat === 'all' || t.category === currentCat;
+    const q = searchQuery.toLowerCase();
+    const matchSearch = !q || t.title.toLowerCase().includes(q)
+      || t.principle.toLowerCase().includes(q)
+      || t.tags.some(tag => tag.toLowerCase().includes(q))
+      || (catMap[t.category]?.label || '').toLowerCase().includes(q);
+    return matchCat && matchSearch;
+  });
+}
+
+function getDiffDots(diff) {
+  let html = '';
+  for (let i = 1; i <= 3; i++) html += `<span class="diff-dot${i <= diff ? ' active' : ''}"></span>`;
+  return html;
+}
+
+function renderCards() {
+  const grid = document.getElementById('cardsGrid');
+  const empty = document.getElementById('emptyState');
+  const info = document.getElementById('resultsInfo');
+  const techs = getFilteredTechs();
+
+  grid.innerHTML = '';
+  if (techs.length === 0) {
+    empty.classList.remove('hidden');
+    info.textContent = '';
+    return;
+  }
+  empty.classList.add('hidden');
+
+  const cat = catMap[currentCat];
+  const catLabel = currentCat === 'all' ? 'toutes catégories' : cat.label;
+  info.innerHTML = `<strong>${techs.length}</strong> technique${techs.length > 1 ? 's' : ''} · ${catLabel}`;
+
+  techs.forEach(t => {
+    const color = catMap[t.category]?.color || '#888';
+    const card = document.createElement('div');
+    card.className = 'card';
+    card.style.cssText = `--cat-color:${color}; border-top-color: ${color}`;
+    card.innerHTML = `
+      <div class="card-top">
+        <span class="card-cat-pill" style="color:${color}">${catMap[t.category]?.label || t.category}</span>
+        <div class="card-diff" title="Difficulté ${t.difficulty}/3">${getDiffDots(t.difficulty)}</div>
+      </div>
+      <div class="card-title">${t.title}</div>
+      <div class="card-subtitle">${t.subtitle}</div>
+      <div class="card-excerpt">${t.principle}</div>
+      <div class="card-tags">${t.tags.slice(0,4).map(tag => `<span class="tag">${tag}</span>`).join('')}</div>
+      <div class="card-footer">
+        <span class="leakage-badge ${t.leakage_risk ? 'risk' : 'safe'}">
+          <span class="leakage-dot ${t.leakage_risk ? 'risk' : 'safe'}"></span>
+          ${t.leakage_risk ? 'Risque leakage' : 'Sans leakage'}
+        </span>
+        <span class="card-open-btn">Détails →</span>
+      </div>
+    `;
+    card.addEventListener('click', () => openModal(t));
+    grid.appendChild(card);
+  });
+}
+
+// ═══ STATS HERO ═══
+function initStats() {
+  const total = DATA.techniques.length;
+  const leakage = DATA.techniques.filter(t => t.leakage_risk).length;
+  document.getElementById('statTotal').textContent = total;
+  document.getElementById('statLeakage').textContent = leakage + '/' + total;
+}
+
+// ═══ MODAL ═══
+function openModal(t) {
+  const color = catMap[t.category]?.color || '#888';
+  const overlay = document.getElementById('modalOverlay');
+
+  // Header
+  const pill = document.getElementById('modalCatPill');
+  pill.textContent = catMap[t.category]?.label || t.category;
+  pill.style.cssText = `background:${color}22; color:${color}; border: 1px solid ${color}44`;
+
+  document.getElementById('modalTitle').textContent = t.title;
+  document.getElementById('modalSubtitle').textContent = t.subtitle;
+
+  const diffLabels = ['', 'Débutant', 'Intermédiaire', 'Avancé'];
+  document.getElementById('modalMeta').innerHTML = `
+    <span class="meta-item"><strong>Difficulté</strong> ${diffLabels[t.difficulty]}</span>
+    <span class="meta-item"><strong>Leakage</strong> ${t.leakage_risk ? '⚠ Risque' : '✓ Sûr'}</span>
+    <span class="meta-item"><strong>Complexité temps</strong> ${t.complexity?.time || '—'}</span>
+    <span class="meta-item">${t.tags.map(tag => `<span class="tag">${tag}</span>`).join(' ')}</span>
+  `;
+
+  // Tab: PRINCIPE
+  document.getElementById('tab-principe').innerHTML = `
+    <div class="content-block">
+      <div class="block-label">Principe</div>
+      <div class="block-text">${t.principle}</div>
+    </div>
+    <div class="content-block">
+      <div class="block-label">Quand utiliser</div>
+      <ul class="use-list good">
+        ${t.when_to_use.map(u => `<li><span class="bullet">✓</span>${u}</li>`).join('')}
+      </ul>
+    </div>
+    <div class="content-block">
+      <div class="block-label">Quand ne pas utiliser</div>
+      <ul class="use-list bad">
+        ${t.when_not_to_use.map(u => `<li><span class="bullet">✗</span>${u}</li>`).join('')}
+      </ul>
+    </div>
+  `;
+
+  // Tab: FORMALISME
+  const fml = t.formalism;
+  let varsHtml = '';
+  if (fml.variables) {
+    varsHtml = `<div class="formula-vars">${fml.variables.map(v => `
+      <div class="formula-var">
+        <span class="var-name">${v.name}</span>
+        <span class="var-desc">${v.desc}</span>
+      </div>`).join('')}
+    </div>`;
+  }
+  document.getElementById('tab-formalisme').innerHTML = `
+    <div class="content-block">
+      <div class="block-label">Formulation mathématique</div>
+      <div class="formula-box">\\[${fml.latex}\\]</div>
+      <div class="formula-note">${fml.explanation}</div>
+    </div>
+    ${fml.variables ? `<div class="content-block"><div class="block-label">Notation</div>${varsHtml}</div>` : ''}
+    <div class="content-block">
+      <div class="block-label">Complexité</div>
+      <div class="complexity-grid">
+        <div class="complexity-item">
+          <div class="c-label">Temps</div>
+          <div class="c-value">${t.complexity?.time || '—'}</div>
+        </div>
+        <div class="complexity-item">
+          <div class="c-label">Espace</div>
+          <div class="c-value">${t.complexity?.space || '—'}</div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  // Tab: CODE
+  document.getElementById('tab-implementation').innerHTML = `
+    <div class="content-block">
+      <div class="block-label">Implémentation Python</div>
+      <pre>${t.implementation}</pre>
+      ${t.code_note ? `<div class="code-note">${t.code_note}</div>` : ''}
+    </div>
+  `;
+
+  // Tab: PIÈGES
+  const leakageHtml = t.leakage_risk
+    ? `<div class="alert-box danger"><span class="alert-icon">⚠</span><div>${t.leakage_note}</div></div>`
+    : `<div class="alert-box info"><span class="alert-icon">✓</span><div>${t.leakage_note}</div></div>`;
+
+  document.getElementById('tab-pieges').innerHTML = `
+    <div class="content-block">
+      <div class="block-label">Risque de Data Leakage</div>
+      ${leakageHtml}
+    </div>
+    <div class="content-block">
+      <div class="block-label">Pièges fréquents</div>
+      <ul class="use-list bad">
+        ${t.when_not_to_use.map(u => `<li><span class="bullet">✗</span>${u}</li>`).join('')}
+      </ul>
+    </div>
+    ${t.complexity && t.complexity.time.includes('n²') || (t.complexity?.time || '').includes('exp')
+      ? `<div class="alert-box warning"><span class="alert-icon">⏱</span><div><strong>Complexité élevée :</strong> ${t.complexity.time} — valider la scalabilité sur votre volume de données.</div></div>`
+      : ''}
+  `;
+
+  // Tab: REFERENCES
+  document.getElementById('tab-references').innerHTML = `
+    <div class="content-block">
+      <div class="block-label">Références académiques &amp; outils</div>
+      <ul class="use-list good">
+        ${(t.references || ['—']).map(r => `<li><span class="bullet">◆</span>${r}</li>`).join('')}
+      </ul>
+    </div>
+  `;
+
+  // Show modal
+  overlay.classList.add('open');
+
+  // Re-render MathJax
+  if (window.MathJax) {
+    MathJax.typesetPromise([document.getElementById('tab-formalisme')]).catch(console.error);
+  }
+
+  // Tab switching
+  document.querySelectorAll('.tab-btn').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+      document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+      btn.classList.add('active');
+      document.getElementById('tab-' + btn.dataset.tab).classList.add('active');
+    });
+  }, { once: false });
+}
+
+// ═══ CLOSE MODAL ═══
+document.getElementById('modalClose').addEventListener('click', closeModal);
+document.getElementById('modalOverlay').addEventListener('click', function(e) {
+  if (e.target === this) closeModal();
+});
+function closeModal() {
+  document.getElementById('modalOverlay').classList.remove('open');
+  // Reset tabs
+  document.querySelectorAll('.tab-btn').forEach((b, i) => b.classList.toggle('active', i === 0));
+  document.querySelectorAll('.tab-panel').forEach((p, i) => p.classList.toggle('active', i === 0));
+}
+
+// ═══ SEARCH ═══
+document.getElementById('searchInput').addEventListener('input', function() {
+  searchQuery = this.value.trim();
+  renderCards();
+});
+
+// ═══ KEYBOARD ═══
+document.addEventListener('keydown', e => {
+  if (e.key === 'Escape') closeModal();
+});
+//=======
+
+function setTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+  localStorage.setItem('theme', theme); // persistance entre sessions
+}
+
+// Au chargement : restaurer le thème sauvegardé
+const savedTheme = localStorage.getItem('theme') || 'dark';
+setTheme(savedTheme);
+//=======
+//=====
+const toggle = document.getElementById('themeToggle');
+
+// Restaurer le thème sauvegardé
+const saved = localStorage.getItem('theme') || 'dark';
+applyTheme(saved);
+toggle.checked = saved === 'dark';
+
+toggle.addEventListener('change', () => {
+  const theme = toggle.checked ? 'dark' : 'light';
+  applyTheme(theme);
+  localStorage.setItem('theme', theme);
+});
+
+function applyTheme(theme) {
+  document.documentElement.setAttribute('data-theme', theme);
+}//===========
+// ═══ BOOT ═══
+buildNav();
+initStats();
+renderCards();
+</script>
+
+
+</body>
+</html>
